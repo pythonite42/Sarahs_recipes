@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="sarahs_recipes"
+        android:label="My Recipes"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/sarahs_recipes_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"
