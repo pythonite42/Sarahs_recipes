@@ -48,16 +48,161 @@ class _MyHomePageState extends State<MyHomePage> {
         centerTitle: true,
         title: Text(widget.title, style: GoogleFonts.indieFlower(fontSize: 30)),
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            Container(
+              padding: EdgeInsets.only(top: 30, left: 20, right: 20),
+              width: double.infinity,
+              height: 140,
+              child: Material(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                child: InkWell(
+                  splashColor: Theme.of(context).colorScheme.primary,
+                  onTap: () {},
+                  child: Stack(
+                    children: [
+                      Ink.image(
+                        image: AssetImage('assets/salad.jpeg'),
+                        fit: BoxFit.cover,
+                      ),
+                      Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        color: Color(0xCFFFFFFF),
+                      ),
+                      Center(
+                        child: Text(
+                          "Salate",
+                          style: GoogleFonts.manrope(
+                              fontSize: 40,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.onPrimary),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            Container(
+              padding: EdgeInsets.only(top: 30, left: 20, right: 20),
+              width: double.infinity,
+              height: 140,
+              child: Material(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                child: InkWell(
+                  splashColor: Theme.of(context).colorScheme.primary,
+                  onTap: () {},
+                  child: Stack(
+                    children: [
+                      Ink.image(
+                        image: AssetImage('assets/salad.jpeg'),
+                        fit: BoxFit.cover,
+                      ),
+                      Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        color: Color(0xCFFFFFFF),
+                      ),
+                      Center(
+                        child: Text(
+                          "Salate",
+                          style: GoogleFonts.manrope(
+                              fontSize: 40,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.onPrimary),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 30, left: 20, right: 20),
+              width: double.infinity,
+              height: 140,
+              child: Material(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                child: InkWell(
+                  splashColor: Theme.of(context).colorScheme.primary,
+                  onTap: () {},
+                  child: Stack(
+                    children: [
+                      Ink.image(
+                        image: AssetImage('assets/salad.jpeg'),
+                        fit: BoxFit.cover,
+                      ),
+                      Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        color: Color(0xCFFFFFFF),
+                      ),
+                      Center(
+                        child: Text(
+                          "Salate",
+                          style: GoogleFonts.manrope(
+                              fontSize: 40,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.onPrimary),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 30, left: 20, right: 20),
+              width: double.infinity,
+              height: 140,
+              child: Material(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                child: InkWell(
+                  splashColor: Theme.of(context).colorScheme.primary,
+                  onTap: () {},
+                  child: Stack(
+                    children: [
+                      Ink.image(
+                        image: AssetImage('assets/salad.jpeg'),
+                        fit: BoxFit.cover,
+                      ),
+                      Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        color: Color(0xCFFFFFFF),
+                      ),
+                      Center(
+                        child: Text(
+                          "Salate",
+                          style: GoogleFonts.manrope(
+                              fontSize: 40,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.onPrimary),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
         ),
