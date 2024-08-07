@@ -40,8 +40,8 @@ class Categories extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Theme.of(context).colorScheme.onSecondary,
         centerTitle: true,
-        title: Text("Sarahs Recipes",
-            style: GoogleFonts.indieFlower(fontSize: 30)),
+        title:
+            Text("Meine Rezepte", style: GoogleFonts.indieFlower(fontSize: 30)),
       ),
       body: SingleChildScrollView(
         child: Column(
