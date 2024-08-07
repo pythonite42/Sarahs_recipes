@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class NewRecipe extends StatefulWidget {
   const NewRecipe({super.key});
@@ -12,6 +13,8 @@ class _NewRecipeState extends State<NewRecipe> {
   var amountTECs = <int, TextEditingController>{};
   var unitTECs = <int, TextEditingController>{};
   var nameTECs = <int, TextEditingController>{};
+  var instructionsController = TextEditingController();
+
   List<Ingredient> ingredients = [];
 
   var item = <int, Widget>{};
@@ -34,69 +37,77 @@ class _NewRecipeState extends State<NewRecipe> {
     amountTECs.addAll({index: amountController});
     unitTECs.addAll({index: unitController});
     nameTECs.addAll({index: nameController});
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        SizedBox(
-          width: MediaQuery.sizeOf(context).width / 8,
-          child: TextFormField(
-            controller: amountController,
-            decoration: InputDecoration(
-              hintText: 'Menge',
-              hintStyle: TextStyle(fontWeight: FontWeight.w300),
+        SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              width: MediaQuery.sizeOf(context).width / 8,
+              child: TextFormField(
+                controller: amountController,
+                decoration: InputDecoration(
+                  hintText: 'Menge',
+                  hintStyle: TextStyle(fontWeight: FontWeight.w300),
+                ),
+              ),
             ),
-          ),
-        ),
-        SizedBox(
-          width: MediaQuery.sizeOf(context).width / 8,
-          child: TextFormField(
-            controller: unitController,
-            decoration: InputDecoration(
-              hintText: 'Einheit',
-              hintStyle: TextStyle(fontWeight: FontWeight.w300),
+            SizedBox(
+              width: MediaQuery.sizeOf(context).width / 8,
+              child: TextFormField(
+                controller: unitController,
+                decoration: InputDecoration(
+                  hintText: 'Einheit',
+                  hintStyle: TextStyle(fontWeight: FontWeight.w300),
+                ),
+              ),
             ),
-          ),
-        ),
-        SizedBox(
-          width: MediaQuery.sizeOf(context).width / 2.5,
-          child: TextFormField(
-            controller: nameController,
-            validator: (value) {
-              return value!.isEmpty &&
-                      (amountController.value.text.isNotEmpty ||
-                          unitController.value.text.isNotEmpty)
-                  ? 'Zutat eingeben'
-                  : null;
-            },
-            onFieldSubmitted: (value) {
-              item.addAll(
-                  {item.keys.last + 1: newMethod(context, item.keys.last + 1)});
-              setState(() {});
-            },
-            decoration: InputDecoration(
-                hintText: 'Zutat',
-                hintStyle: TextStyle(fontWeight: FontWeight.w300)),
-          ),
-        ),
-        Visibility(
-          maintainSize: true,
-          maintainAnimation: true,
-          maintainState: true,
-          visible: nameTECs.keys.length > 1,
-          child: IconButton(
-            onPressed: () {
-              setState(() {
-                item.removeWhere((key, value) => key == index);
-                amountTECs.removeWhere((key, value) => key == index);
-                unitTECs.removeWhere((key, value) => key == index);
-                nameTECs.removeWhere((key, value) => key == index);
-              });
-            },
-            iconSize: 20,
-            color: Colors.grey,
-            icon: Icon(Icons.delete),
-          ),
-        ),
+            SizedBox(
+              width: MediaQuery.sizeOf(context).width / 2.5,
+              child: TextFormField(
+                controller: nameController,
+                validator: (value) {
+                  return value!.isEmpty &&
+                          (amountController.value.text.isNotEmpty ||
+                              unitController.value.text.isNotEmpty)
+                      ? 'Zutat eingeben'
+                      : null;
+                },
+                onFieldSubmitted: (value) {
+                  item.addAll({
+                    item.keys.last + 1: newMethod(context, item.keys.last + 1)
+                  });
+                  setState(() {});
+                },
+                decoration: InputDecoration(
+                    hintText: 'Zutat',
+                    hintStyle: TextStyle(fontWeight: FontWeight.w300)),
+              ),
+            ),
+            Visibility(
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              visible: nameTECs.keys.length > 1,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    item.removeWhere((key, value) => key == index);
+                    amountTECs.removeWhere((key, value) => key == index);
+                    unitTECs.removeWhere((key, value) => key == index);
+                    nameTECs.removeWhere((key, value) => key == index);
+                  });
+                },
+                child: Icon(
+                  Icons.delete,
+                  size: 20,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ],
+        )
       ],
     );
   }
@@ -117,12 +128,14 @@ class _NewRecipeState extends State<NewRecipe> {
       child: Form(
         key: _formKey,
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 40, horizontal: 30),
+          padding: EdgeInsets.symmetric(vertical: 40, horizontal: 20),
           child: Column(
             children: [
               TextFormField(
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
                 controller: titleController,
-                style: TextStyle(fontSize: 30),
+                style: GoogleFonts.indieFlower(fontSize: 30),
                 textAlign: TextAlign.center,
                 decoration: InputDecoration(
                   border: InputBorder.none,
@@ -136,13 +149,54 @@ class _NewRecipeState extends State<NewRecipe> {
                 },
               ),
               SizedBox(height: 30),
-              ListView.builder(
-                  shrinkWrap: true,
-                  physics: ScrollPhysics(),
-                  itemCount: item.length,
-                  itemBuilder: (context, index) {
-                    return item.values.elementAt(index);
-                  }),
+              Card(
+                elevation: 3,
+                color: Theme.of(context).colorScheme.surfaceDim,
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Text(
+                        "Zutaten",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 10),
+                      ListView.builder(
+                          shrinkWrap: true,
+                          physics: ScrollPhysics(),
+                          itemCount: item.length,
+                          itemBuilder: (context, index) {
+                            return item.values.elementAt(index);
+                          }),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 30),
+              Card(
+                elevation: 3,
+                color: Theme.of(context).colorScheme.surfaceDim,
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Column(children: [
+                    Text(
+                      "Zubereitung",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 20),
+                    TextFormField(
+                      controller: instructionsController,
+                      decoration: InputDecoration(
+                        filled: true,
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 15,
+                    ),
+                  ]),
+                ),
+              ),
               SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {
