@@ -16,22 +16,15 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.light,
       theme: GlobalThemData.lightThemeData,
       darkTheme: GlobalThemData.darkThemeData,
-      home: const MyHomePage(title: 'Sarahs Recipes'),
+      home: Categories(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class Categories extends StatelessWidget {
+  Categories({super.key});
 
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  final List catgories = [
+  final List categories = [
     {"name": "Salate", "imageName": "salad.jpeg"},
     {"name": "Hauptgerichte", "imageName": "hauptgerichte.jpg"},
     {"name": "Brote", "imageName": "brote.jpg"},
@@ -47,13 +40,14 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Theme.of(context).colorScheme.onSecondary,
         centerTitle: true,
-        title: Text(widget.title, style: GoogleFonts.indieFlower(fontSize: 30)),
+        title: Text("Sarahs Recipes",
+            style: GoogleFonts.indieFlower(fontSize: 30)),
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            for (var category in catgories)
+            for (var category in categories)
               Container(
                 padding: EdgeInsets.only(top: 30, left: 20, right: 20),
                 width: double.infinity,
