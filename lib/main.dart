@@ -20,7 +20,10 @@ class MyApp extends StatelessWidget {
       darkTheme: GlobalThemData.darkThemeData,
       initialRoute: '/',
       routes: {
-        '/': (context) => MyScaffold(body: Categories()),
+        '/': (context) => MyScaffold(
+              body: Categories(),
+              floatingActionButton: true,
+            ),
         '/newRecipe': (context) => MyScaffold(body: NewRecipe()),
       },
     );
@@ -44,13 +47,15 @@ class MyScaffold extends StatelessWidget {
             Text("Meine Rezepte", style: GoogleFonts.indieFlower(fontSize: 30)),
       ),
       body: body,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/newRecipe');
-        },
-        tooltip: 'Neues Rezept',
-        child: Icon(Icons.add),
-      ),
+      floatingActionButton: floatingActionButton
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/newRecipe');
+              },
+              tooltip: 'Neues Rezept',
+              child: Icon(Icons.add),
+            )
+          : null,
     );
   }
 }
