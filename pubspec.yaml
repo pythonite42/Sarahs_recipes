@@ -63,6 +63,11 @@ flutter:
   assets:
     - assets/icon.svg
     - assets/salad.jpeg
+    - assets/hauptgerichte.jpg
+    - assets/brote.jpg
+    - assets/sweets.jpg
+    - assets/drinks.jpg
+    - assets/sonstiges.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
