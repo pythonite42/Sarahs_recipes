@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sarahs_recipes/categories.dart';
 import 'package:sarahs_recipes/new_recipe.dart';
+import 'package:sarahs_recipes/recipes.dart';
 import 'colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
               floatingActionButton: true,
             ),
         '/newRecipe': (context) => MyScaffold(body: NewRecipe()),
+        '/recipes': (context) => MyScaffold(body: Recipes()),
       },
     );
   }

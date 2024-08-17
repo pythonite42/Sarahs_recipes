@@ -32,7 +32,9 @@ class Categories extends StatelessWidget {
                 clipBehavior: Clip.antiAliasWithSaveLayer,
                 child: InkWell(
                   splashColor: Theme.of(context).colorScheme.primary,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(context, '/recipes');
+                  },
                   child: Stack(
                     children: [
                       Ink.image(

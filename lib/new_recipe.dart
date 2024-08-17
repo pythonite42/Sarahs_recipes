@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -236,11 +237,20 @@ class _NewRecipeState extends State<NewRecipe> {
 class Ingredient {
   final String? amount;
   final String? unit;
-  final String? name;
+  final String name;
 
   Ingredient(
     this.amount,
     this.unit,
     this.name,
   );
+}
+
+class Recipe {
+  final String name;
+  final Uint8List? image;
+  final String category;
+  final String? instructions;
+
+  Recipe(this.name, this.image, this.category, this.instructions);
 }
