@@ -4,13 +4,8 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Database structure:
 
-A few resources to get you started if this is your first Flutter project:
+CREATE TABLE recipe (id INT AUTO_INCREMENT, name VARCHAR(100) NOT NULL, image BLOB, category VARCHAR(50) NOT NULL, instructions VARCHAR(10000), PRIMARY KEY(id));
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+CREATE TABLE ingredient (id INT AUTO_INCREMENT, recipe_id INT NOT NULL, entry_number INT NOT NULL, amount VARCHAR(50), unit VARCHAR(50), name VARCHAR(100) NOT NULL, PRIMARY KEY(id), FOREIGN KEY (recipe_id) REFERENCES recipe(id)); 
