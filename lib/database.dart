@@ -18,4 +18,41 @@ class MySQL {
     }
   }
 
+  Future recipeEntry() async {
+    try {
+      return await initializeDB((db) async {
+        if (db.runtimeType == String) {
+          return db;
+        }
+
+        var cmd = await db.prepare(
+          'INSERT INTO recipe (name, image, category, instructions) values (?, ?, ?, ?)',
+        );
+        await cmd.execute(["Test", null, "Brote", "einfach backen"]);
+        await cmd.deallocate();
+        return true;
+      });
+    } catch (_) {
+      return _.toString();
+    }
+  }
+
+  Future getRecipes() async {
+    try {
+      return await initializeDB((db) async {
+        if (db.runtimeType == String) {
+          return db;
+        }
+        var result = await db.execute('SELECT * FROM recipe');
+
+        for (final row in result.rows) {
+          Map content = row.assoc();
+          print(content);
+        }
+        return null;
+      });
+    } catch (_) {
+      return _.toString();
+    }
+  }
 }
