@@ -20,21 +20,35 @@ class MyApp extends StatelessWidget {
       theme: GlobalThemData.lightThemeData,
       darkTheme: GlobalThemData.darkThemeData,
       initialRoute: '/',
-      routes: {
-        '/': (context) => MyScaffold(
-              body: Categories(),
-              floatingActionButton: true,
-            ),
-        '/newRecipe': (context) => MyScaffold(body: NewRecipe()),
-        '/recipes': (context) => MyScaffold(body: Recipes()),
+      onGenerateRoute: (settings) {
+        if (settings.name == '/') {
+          return MaterialPageRoute(
+            builder: (context) {
+              return MyScaffold(body: Categories());
+            },
+          );
+        } else if (settings.name == '/newRecipe') {
+          final args = settings.arguments as ScreenArguments;
+          return MaterialPageRoute(
+            builder: (context) {
+              return MyScaffold(body: NewRecipe(category: args.category));
+            },
+          );
+        } else if (settings.name == '/recipes') {
+          return MaterialPageRoute(
+            builder: (context) {
+              return MyScaffold(body: Recipes());
+            },
+          );
+        }
+        return null;
       },
     );
   }
 }
 
 class MyScaffold extends StatelessWidget {
-  const MyScaffold(
-      {super.key, required this.body, this.floatingActionButton = false});
+  const MyScaffold({super.key, required this.body, this.floatingActionButton = false});
 
   final Widget body;
   final bool floatingActionButton;
@@ -45,19 +59,15 @@ class MyScaffold extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Theme.of(context).colorScheme.onSecondary,
         centerTitle: true,
-        title:
-            Text("Meine Rezepte", style: GoogleFonts.indieFlower(fontSize: 30)),
+        title: Text("Meine Rezepte", style: GoogleFonts.indieFlower(fontSize: 30)),
       ),
       body: body,
-      floatingActionButton: floatingActionButton
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/newRecipe');
-              },
-              tooltip: 'Neues Rezept',
-              child: Icon(Icons.add),
-            )
-          : null,
     );
   }
+}
+
+class ScreenArguments {
+  final String category;
+
+  ScreenArguments(this.category);
 }

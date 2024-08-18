@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NewRecipe extends StatefulWidget {
-  const NewRecipe({super.key});
+  const NewRecipe({super.key, required this.category});
+  final String category;
 
   @override
   State<NewRecipe> createState() => _NewRecipeState();
@@ -70,20 +71,15 @@ class _NewRecipeState extends State<NewRecipe> {
                 controller: nameController,
                 validator: (value) {
                   return value!.isEmpty &&
-                          (amountController.value.text.isNotEmpty ||
-                              unitController.value.text.isNotEmpty)
+                          (amountController.value.text.isNotEmpty || unitController.value.text.isNotEmpty)
                       ? 'Zutat eingeben'
                       : null;
                 },
                 onFieldSubmitted: (value) {
-                  item.addAll({
-                    item.keys.last + 1: newMethod(context, item.keys.last + 1)
-                  });
+                  item.addAll({item.keys.last + 1: newMethod(context, item.keys.last + 1)});
                   setState(() {});
                 },
-                decoration: InputDecoration(
-                    hintText: 'Zutat',
-                    hintStyle: TextStyle(fontWeight: FontWeight.w300)),
+                decoration: InputDecoration(hintText: 'Zutat', hintStyle: TextStyle(fontWeight: FontWeight.w300)),
               ),
             ),
             Visibility(
@@ -132,6 +128,11 @@ class _NewRecipeState extends State<NewRecipe> {
           padding: EdgeInsets.symmetric(vertical: 40, horizontal: 20),
           child: Column(
             children: [
+              Text(
+                "Neues Rezept in ${widget.category}",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
+              ),
+              SizedBox(height: 30),
               TextFormField(
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
@@ -159,8 +160,7 @@ class _NewRecipeState extends State<NewRecipe> {
                     children: [
                       Text(
                         "Zutaten",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 10),
                       ListView.builder(
@@ -183,8 +183,7 @@ class _NewRecipeState extends State<NewRecipe> {
                   child: Column(children: [
                     Text(
                       "Zubereitung",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 20),
                     TextFormField(
