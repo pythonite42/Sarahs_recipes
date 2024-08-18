@@ -23,22 +23,25 @@ class MySQL {
     }
   }
 
-  Future recipeEntry() async {
+  Future recipeEntry(Recipe recipe) async {
     try {
       return await initializeDB((db) async {
         if (db.runtimeType == String) {
           return db;
         }
 
-        final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+        /* final image = await ImagePicker().pickImage(source: ImageSource.gallery);
 
-        List<int>? bytes = await image?.readAsBytes();
-        String? base64Image = bytes != null ? base64Encode(bytes) : null;
+        Uint8List? bytes = await image?.readAsBytes();
+         String? base64Image = bytes != null ? base64Encode(bytes) : null; */
+        Uint8List? test = recipe.image;
+        String? base64Image = test != null ? base64Encode(test) : null;
+        //String? base64Image = recipe.image != null ? base64Encode(recipe.image!) : null;
 
         var cmd = await db.prepare(
           'INSERT INTO recipe (name, image, category, instructions) values (?, ?, ?, ?)',
         );
-        await cmd.execute(["Test", base64Image, "Brote", "einfach backen"]);
+        await cmd.execute([recipe.name, base64Image, recipe.category, recipe.instructions]);
         await cmd.deallocate();
         return true;
       });

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sarahs_recipes/database.dart';
 
 class NewRecipe extends StatefulWidget {
   const NewRecipe({super.key, required this.category});
@@ -232,11 +233,16 @@ class _NewRecipeState extends State<NewRecipe> {
               ),
               SizedBox(height: 30),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     ingredients.clear();
+                    Recipe recipe =
+                        Recipe(titleController.value.text, image, widget.category, instructionsController.value.text);
                     var title = titleController.value.text;
-                    print("title: $title");
+                    print("recipe: $recipe");
                     for (int i = 0; i <= nameTECs.keys.last; i++) {
                       var amount = amountTECs[i]?.value.text;
                       var unit = unitTECs[i]?.value.text;
@@ -253,7 +259,9 @@ class _NewRecipeState extends State<NewRecipe> {
                       print(ingredients[a].name);
                     }
                     // _formKey.currentState!.save();
+                    MySQL().recipeEntry(recipe);
                     setState(() {});
+                    Navigator.pop(context);
                   }
                 },
                 child: Text('Speichern'),

@@ -44,7 +44,9 @@ class _RecipesState extends State<Recipes> {
                           width: 200,
                           height: 50,
                         ),
-                      Text(recipe.name)
+                      Text(recipe.name),
+                      Text(recipe.category),
+                      Text(recipe.instructions ?? "")
                     ],
                   )
               ],
