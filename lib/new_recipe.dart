@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 
 class NewRecipe extends StatefulWidget {
   const NewRecipe({super.key, required this.category});
@@ -16,6 +17,7 @@ class _NewRecipeState extends State<NewRecipe> {
   var unitTECs = <int, TextEditingController>{};
   var nameTECs = <int, TextEditingController>{};
   var instructionsController = TextEditingController();
+  Uint8List? image;
 
   List<Ingredient> ingredients = [];
 
@@ -150,6 +152,37 @@ class _NewRecipeState extends State<NewRecipe> {
                   return null;
                 },
               ),
+              SizedBox(height: 15),
+              Column(children: [
+                GestureDetector(
+                  onTap: () async {
+                    final pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
+                    Uint8List? bytes = await pickedImage?.readAsBytes();
+                    setState(() {
+                      image = bytes;
+                    });
+                  },
+                  child: (image != null)
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.memory(
+                            image!,
+                            fit: BoxFit.cover,
+                          ))
+                      : Container(
+                          width: MediaQuery.sizeOf(context).width * 0.5,
+                          height: MediaQuery.sizeOf(context).width * 0.3,
+                          decoration: ShapeDecoration(
+                              color: Colors.black12,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                          child: Icon(
+                            Icons.photo,
+                            size: MediaQuery.sizeOf(context).width * 0.15,
+                            color: Colors.grey,
+                          ),
+                        ),
+                ),
+              ]),
               SizedBox(height: 30),
               Card(
                 elevation: 3,
