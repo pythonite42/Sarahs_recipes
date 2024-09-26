@@ -1,9 +1,6 @@
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:mysql_client/mysql_client.dart';
 import 'package:sarahs_recipes/new_recipe.dart';
+import 'package:sarahs_recipes/ssh.dart';
 
 class MySQL {
   Future initializeDB(Function function) async {
@@ -29,19 +26,11 @@ class MySQL {
         if (db.runtimeType == String) {
           return db;
         }
-
-        /* final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-
-        Uint8List? bytes = await image?.readAsBytes();
-         String? base64Image = bytes != null ? base64Encode(bytes) : null; */
-        Uint8List? test = recipe.image;
-        String? base64Image = test != null ? base64Encode(test) : null;
-        //String? base64Image = recipe.image != null ? base64Encode(recipe.image!) : null;
-
+        await SSH().uploadImage(recipe);
         var cmd = await db.prepare(
-          'INSERT INTO recipe (name, image, category, instructions) values (?, ?, ?, ?)',
+          'INSERT INTO recipe (name, category, instructions) values (?, ?, ?)',
         );
-        await cmd.execute([recipe.name, base64Image, recipe.category, recipe.instructions]);
+        await cmd.execute([recipe.name, recipe.category, recipe.instructions]);
         await cmd.deallocate();
         return true;
       });
@@ -60,12 +49,19 @@ class MySQL {
 
         List recipesList = [];
 
+        List<String> recipeNames = [];
         for (final row in result.rows) {
           Map content = row.assoc();
+          recipeNames.add(content["name"]);
+        }
+        var images = await SSH().downloadImages(recipeNames);
+        var i = 0;
+        for (final row in result.rows) {
+          //normal counting loop not possible because result.rows[i] throws error
+          Map content = row.assoc();
           print(content);
-          String? base64Image = content["image"];
-          Uint8List? image = base64Image != null ? base64.decode(base64Image) : null;
-          recipesList.add(Recipe(content["name"], image, content["category"], content["instructions"]));
+          recipesList.add(Recipe(content["name"], images[i], content["category"], content["instructions"]));
+          i += 1;
         }
         return recipesList;
       });

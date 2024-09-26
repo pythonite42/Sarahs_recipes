@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,7 +18,7 @@ class _NewRecipeState extends State<NewRecipe> {
   var unitTECs = <int, TextEditingController>{};
   var nameTECs = <int, TextEditingController>{};
   var instructionsController = TextEditingController();
-  Uint8List? image;
+  File? image;
 
   List<Ingredient> ingredients = [];
 
@@ -157,16 +157,20 @@ class _NewRecipeState extends State<NewRecipe> {
               Column(children: [
                 GestureDetector(
                   onTap: () async {
-                    final pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
-                    Uint8List? bytes = await pickedImage?.readAsBytes();
+                    final XFile? pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
+                    final pathVar = pickedImage?.path;
+                    if (pathVar == null) {
+                      return;
+                    }
+                    File file = File(pathVar);
                     setState(() {
-                      image = bytes;
+                      image = file;
                     });
                   },
                   child: (image != null)
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(10),
-                          child: Image.memory(
+                          child: Image.file(
                             image!,
                             fit: BoxFit.cover,
                           ))
@@ -288,7 +292,7 @@ class Ingredient {
 
 class Recipe {
   final String name;
-  final Uint8List? image;
+  final File? image;
   final String category;
   final String? instructions;
 

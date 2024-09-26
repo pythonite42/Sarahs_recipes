@@ -39,7 +39,7 @@ class _RecipesState extends State<Recipes> {
                   Row(
                     children: [
                       if (recipe.image != null)
-                        Image.memory(
+                        Image.file(
                           recipe.image!,
                           width: 200,
                           height: 50,
