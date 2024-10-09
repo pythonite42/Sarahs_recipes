@@ -32,6 +32,24 @@ class MySQL {
         );
         await cmd.execute([recipe.name, recipe.category, recipe.instructions]);
         await cmd.deallocate();
+        var result = await db.execute('SELECT last_insert_id()');
+        int? id;
+        for (final row in result.rows) {
+          //normal counting loop not possible because result.rows[i] throws error
+          try {
+            id = int.parse(row.assoc().values.first);
+          } catch (_) {}
+        }
+        if (id == null) {
+          return "Die Rezept Id konnte nicht ausgelesen werden. Die Zutaten wurden nicht gespeichert, das Rezept nur eventuell.";
+        }
+        var secondCmd = await db.prepare(
+          'INSERT INTO ingredient (recipe_id, entry_number, amount, unit, name) values (?, ?, ?, ?, ?)',
+        );
+        for (final (i, ingredient) in recipe.ingredients.indexed) {
+          await secondCmd.execute([id, i, ingredient.amount, ingredient.unit, ingredient.name]);
+        }
+        await secondCmd.deallocate();
         return true;
       });
     } catch (_) {
@@ -60,7 +78,7 @@ class MySQL {
           //normal counting loop not possible because result.rows[i] throws error
           Map content = row.assoc();
           print(content);
-          recipesList.add(Recipe(content["name"], images[i], content["category"], content["instructions"]));
+          recipesList.add(Recipe(content["name"], images[i], content["category"], [], content["instructions"]));
           i += 1;
         }
         return recipesList;

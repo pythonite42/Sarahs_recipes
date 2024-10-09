@@ -245,19 +245,16 @@ class _NewRecipeState extends State<NewRecipe> {
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.secondary,
                     textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     ingredients.clear();
-                    Recipe recipe =
-                        Recipe(titleController.value.text, image, widget.category, instructionsController.value.text);
-                    var title = titleController.value.text;
-                    print("recipe: $recipe");
+
                     for (int i = 0; i <= nameTECs.keys.last; i++) {
                       var amount = amountTECs[i]?.value.text;
                       var unit = unitTECs[i]?.value.text;
                       var name = nameTECs[i]?.value.text;
 
-                      if (name != null) {
+                      if (name != null && name != "") {
                         ingredients.add(Ingredient(amount, unit, name));
                       }
                     }
@@ -267,10 +264,53 @@ class _NewRecipeState extends State<NewRecipe> {
                       print(ingredients[a].unit);
                       print(ingredients[a].name);
                     }
+                    Recipe recipe = Recipe(titleController.value.text, image, widget.category, ingredients,
+                        instructionsController.value.text);
                     // _formKey.currentState!.save();
-                    MySQL().recipeEntry(recipe);
+                    print("recipe: $recipe");
+                    showDialog(
+                      useRootNavigator: false,
+                      context: context,
+                      builder: (_) {
+                        return AlertDialog(
+                          content: Row(
+                            children: [
+                              CircularProgressIndicator(color: Theme.of(context).primaryColor),
+                              const SizedBox(
+                                width: 20,
+                              ),
+                              const Text("Loading ..."),
+                            ],
+                          ),
+                        );
+                      },
+                      barrierDismissible: false,
+                    );
+                    var result = await MySQL().recipeEntry(recipe);
                     setState(() {});
                     Navigator.pop(context);
+                    if (result != true) {
+                      showDialog(
+                        useRootNavigator: false,
+                        context: context,
+                        builder: (_) {
+                          return AlertDialog(
+                            title: Text("Fehlermeldung"),
+                            content: Text(result.toString()),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text("Okay")),
+                            ],
+                          );
+                        },
+                        barrierDismissible: false,
+                      );
+                    } else {
+                      Navigator.pop(context);
+                    }
                   }
                 },
                 child: Text('Speichern'),
@@ -299,7 +339,8 @@ class Recipe {
   final String name;
   final File? image;
   final String category;
+  final List<Ingredient> ingredients;
   final String? instructions;
 
-  Recipe(this.name, this.image, this.category, this.instructions);
+  Recipe(this.name, this.image, this.category, this.ingredients, this.instructions);
 }
