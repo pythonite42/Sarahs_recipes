@@ -78,7 +78,6 @@ class MySQL {
         for (final row in result.rows) {
           //normal counting loop not possible because result.rows[i] throws error
           Map content = row.assoc();
-          print(content);
           recipesList.add(Recipe(content["name"], images[i], content["category"], [], content["instructions"]));
           i += 1;
         }

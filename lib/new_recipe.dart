@@ -258,16 +258,9 @@ class _NewRecipeState extends State<NewRecipe> {
                         ingredients.add(Ingredient(amount, unit, name));
                       }
                     }
-                    print(ingredients);
-                    for (int a = 0; a < ingredients.length; a++) {
-                      print(ingredients[a].amount);
-                      print(ingredients[a].unit);
-                      print(ingredients[a].name);
-                    }
+
                     Recipe recipe = Recipe(titleController.value.text, image, widget.category, ingredients,
                         instructionsController.value.text);
-                    // _formKey.currentState!.save();
-                    print("recipe: $recipe");
                     showDialog(
                       useRootNavigator: false,
                       context: context,
@@ -288,28 +281,30 @@ class _NewRecipeState extends State<NewRecipe> {
                     );
                     var result = await MySQL().recipeEntry(recipe);
                     setState(() {});
-                    Navigator.pop(context);
-                    if (result != true) {
-                      showDialog(
-                        useRootNavigator: false,
-                        context: context,
-                        builder: (_) {
-                          return AlertDialog(
-                            title: Text("Fehlermeldung"),
-                            content: Text(result.toString()),
-                            actions: [
-                              TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text("Okay")),
-                            ],
-                          );
-                        },
-                        barrierDismissible: false,
-                      );
-                    } else {
+                    if (context.mounted) {
                       Navigator.pop(context);
+                      if (result != true) {
+                        showDialog(
+                          useRootNavigator: false,
+                          context: context,
+                          builder: (_) {
+                            return AlertDialog(
+                              title: Text("Fehlermeldung"),
+                              content: Text(result.toString()),
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text("Okay")),
+                              ],
+                            );
+                          },
+                          barrierDismissible: false,
+                        );
+                      } else {
+                        Navigator.pop(context);
+                      }
                     }
                   }
                 },
