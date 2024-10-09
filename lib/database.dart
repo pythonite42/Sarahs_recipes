@@ -26,7 +26,7 @@ class MySQL {
         if (db.runtimeType == String) {
           return db;
         }
-        await SSH().uploadImage(recipe);
+
         var cmd = await db.prepare(
           'INSERT INTO recipe (name, category, instructions) values (?, ?, ?)',
         );
@@ -50,6 +50,7 @@ class MySQL {
           await secondCmd.execute([id, i, ingredient.amount, ingredient.unit, ingredient.name]);
         }
         await secondCmd.deallocate();
+        await SSH().uploadImage(recipe, id);
         return true;
       });
     } catch (_) {
@@ -67,12 +68,12 @@ class MySQL {
 
         List recipesList = [];
 
-        List<String> recipeNames = [];
+        List<String> recipeIds = [];
         for (final row in result.rows) {
           Map content = row.assoc();
-          recipeNames.add(content["name"]);
+          recipeIds.add(content["id"]);
         }
-        var images = await SSH().downloadImages(recipeNames);
+        var images = await SSH().downloadImages(recipeIds);
         var i = 0;
         for (final row in result.rows) {
           //normal counting loop not possible because result.rows[i] throws error

@@ -27,17 +27,17 @@ class SSH {
     return null;
   }
 
-  uploadImage(Recipe recipe) {
+  uploadImage(Recipe recipe, int recipeId) {
     if (recipe.image != null) {
       initSSH((SSHClient client) async {
         String result = await client.connectSFTP() ?? 'Null result';
         if (result == "sftp_connected") {
           File file = recipe.image!;
           String dir = path.dirname(file.path);
-          String newPath = path.join(dir, '${getImageName(recipe.name)}');
+          String newPath = path.join(dir, '$recipeId.jpg');
           file = file.renameSync(newPath);
           try {
-            await client.sftpRm("sarahs_recipes_images/${getImageName(recipe.name)}");
+            await client.sftpRm("sarahs_recipes_images/$recipeId.jpg");
           } catch (_) {}
           try {
             await client.sftpUpload(
@@ -56,17 +56,17 @@ class SSH {
     }
   }
 
-  Future<List<File?>> downloadImages(List<String> recipeNames) async {
+  Future<List<File?>> downloadImages(List<String> recipeIds) async {
     List<File?>? returnVal = await initSSH((SSHClient client) async {
       List<File?> returnValue = [];
       String result = await client.connectSFTP() ?? 'Null result';
       if (result == "sftp_connected") {
-        for (final recipeName in recipeNames) {
+        for (final recipeId in recipeIds) {
           try {
             Directory tempDir = await getTemporaryDirectory();
-            String newPath = path.join(tempDir.path, '${getImageName(recipeName)}');
+            String newPath = path.join(tempDir.path, '$recipeId.jpg');
             await client.sftpDownload(
-              path: "sarahs_recipes_images/${getImageName(recipeName)}",
+              path: "sarahs_recipes_images/$recipeId.jpg",
               toPath: newPath,
               callback: (progress) async {
                 //if (progress == 20) await client.sftpCancelDownload();
@@ -83,10 +83,6 @@ class SSH {
         return returnValue;
       }
     });
-    return returnVal ?? List<File?>.filled(recipeNames.length, null, growable: true);
+    return returnVal ?? List<File?>.filled(recipeIds.length, null, growable: true);
   }
-}
-
-getImageName(String recipeName) {
-  return "${recipeName.replaceAll(" ", "")}.jpg";
 }
