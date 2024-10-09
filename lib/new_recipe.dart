@@ -66,6 +66,7 @@ class _NewRecipeState extends State<NewRecipe> {
                   hintStyle: TextStyle(fontWeight: FontWeight.w300),
                 ),
                 textInputAction: TextInputAction.next,
+                textCapitalization: TextCapitalization.characters,
               ),
             ),
             SizedBox(
@@ -85,6 +86,7 @@ class _NewRecipeState extends State<NewRecipe> {
                   newFocusNode.requestFocus();
                 },
                 decoration: InputDecoration(hintText: 'Zutat', hintStyle: TextStyle(fontWeight: FontWeight.w300)),
+                textCapitalization: TextCapitalization.words,
               ),
             ),
             Visibility(
@@ -194,6 +196,7 @@ class _NewRecipeState extends State<NewRecipe> {
                     }
                     return null;
                   },
+                  textCapitalization: TextCapitalization.words,
                 ),
                 SizedBox(height: 15),
                 Column(children: [
@@ -273,6 +276,7 @@ class _NewRecipeState extends State<NewRecipe> {
                           border: OutlineInputBorder(),
                         ),
                         maxLines: 15,
+                        textCapitalization: TextCapitalization.sentences,
                       ),
                     ]),
                   ),
