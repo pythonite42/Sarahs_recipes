@@ -55,7 +55,7 @@ class _NewRecipeState extends State<NewRecipe> {
                   hintStyle: TextStyle(fontWeight: FontWeight.w300),
                 ),
                 textInputAction: TextInputAction.next,
-              ),
+                  keyboardType: TextInputType.number),
             ),
             SizedBox(
               width: MediaQuery.sizeOf(context).width / 8,
@@ -296,7 +296,12 @@ class _NewRecipeState extends State<NewRecipe> {
                         var name = nameTECs[i]?.value.text;
 
                         if (name != null && name != "") {
-                          ingredients.add(Ingredient(amount, unit, name));
+                          double? amountDouble;
+                          if (amount != null) {
+                            amountDouble = double.parse(amount.replaceAll(",", "."));
+                            amountDouble = double.parse(amountDouble.toStringAsFixed(1));
+                          }
+                          ingredients.add(Ingredient(amountDouble, unit, name));
                         }
                       }
 
@@ -361,7 +366,7 @@ class _NewRecipeState extends State<NewRecipe> {
 }
 
 class Ingredient {
-  final String? amount;
+  final double? amount;
   final String? unit;
   final String name;
 
