@@ -29,13 +29,10 @@ class _NewRecipeState extends State<NewRecipe> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    item.addAll({0: newMethod(context, 0)});
+    item.addAll({0: newMethod(context, 0, FocusNode())});
   }
 
-  newMethod(
-    BuildContext context,
-    int index,
-  ) {
+  newMethod(BuildContext context, int index, FocusNode focusNode) {
     var amountController = TextEditingController();
     var unitController = TextEditingController();
     var nameController = TextEditingController();
@@ -51,11 +48,13 @@ class _NewRecipeState extends State<NewRecipe> {
             SizedBox(
               width: MediaQuery.sizeOf(context).width / 8,
               child: TextFormField(
+                focusNode: focusNode,
                 controller: amountController,
                 decoration: InputDecoration(
                   hintText: 'Menge',
                   hintStyle: TextStyle(fontWeight: FontWeight.w300),
                 ),
+                textInputAction: TextInputAction.next,
               ),
             ),
             SizedBox(
@@ -66,6 +65,7 @@ class _NewRecipeState extends State<NewRecipe> {
                   hintText: 'Einheit',
                   hintStyle: TextStyle(fontWeight: FontWeight.w300),
                 ),
+                textInputAction: TextInputAction.next,
               ),
             ),
             SizedBox(
@@ -79,8 +79,10 @@ class _NewRecipeState extends State<NewRecipe> {
                       : null;
                 },
                 onFieldSubmitted: (value) {
-                  item.addAll({item.keys.last + 1: newMethod(context, item.keys.last + 1)});
+                  var newFocusNode = FocusNode();
+                  item.addAll({item.keys.last + 1: newMethod(context, item.keys.last + 1, newFocusNode)});
                   setState(() {});
+                  newFocusNode.requestFocus();
                 },
                 decoration: InputDecoration(hintText: 'Zutat', hintStyle: TextStyle(fontWeight: FontWeight.w300)),
               ),
@@ -89,7 +91,7 @@ class _NewRecipeState extends State<NewRecipe> {
               maintainSize: true,
               maintainAnimation: true,
               maintainState: true,
-              visible: nameTECs.keys.length > 1,
+              visible: true,
               child: GestureDetector(
                 onTap: () {
                   setState(() {
@@ -98,6 +100,9 @@ class _NewRecipeState extends State<NewRecipe> {
                     unitTECs.removeWhere((key, value) => key == index);
                     nameTECs.removeWhere((key, value) => key == index);
                   });
+                  if (item.isEmpty) {
+                    item.addAll({0: newMethod(context, 0, FocusNode())});
+                  }
                 },
                 child: Icon(
                   Icons.delete,
