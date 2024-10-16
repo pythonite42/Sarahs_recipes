@@ -37,6 +37,10 @@ dependencies:
   cupertino_icons: ^1.0.6
   google_fonts: ^6.2.1
   mysql_client: ^0.0.27
+  image_picker: ^1.1.2
+  path_provider: ^2.1.4
+  ssh2: ^2.2.3
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +73,7 @@ flutter:
     - assets/sweets.jpg
     - assets/drinks.jpg
     - assets/sonstiges.jpg
+    - assets/missing_image.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

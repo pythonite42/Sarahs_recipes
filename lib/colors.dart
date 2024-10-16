@@ -24,6 +24,7 @@ class GlobalThemData {
     error: Color(0xFFB90E0A),
     onError: Color(0xFFFAFAFA),
     surface: Color(0xFFFAFAFA),
+    surfaceDim: Color(0xFFFAEDF7),
     onSurface: Color(0xFF111D13),
     brightness: Brightness.light,
   );
@@ -36,6 +37,7 @@ class GlobalThemData {
     error: Color(0xFFB90E0A),
     onError: Color(0xFFFAFAFA),
     surface: Color(0xFF111D13),
+    surfaceDim: Color(0xFFFAEDF7),
     onSurface: Color(0xFFFAFAFA),
     brightness: Brightness.dark,
   );
