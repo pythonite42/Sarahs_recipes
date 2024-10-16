@@ -3,7 +3,8 @@ import 'package:sarahs_recipes/database.dart';
 import 'package:sarahs_recipes/new_recipe.dart';
 
 class Recipes extends StatefulWidget {
-  const Recipes({super.key});
+  const Recipes({super.key, required this.category});
+  final String category;
 
   @override
   State<Recipes> createState() => _RecipesState();

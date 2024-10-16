@@ -6,12 +6,12 @@ class Categories extends StatelessWidget {
   Categories({super.key});
 
   final List categories = [
-    {"name": "Salate", "imageName": "salad.jpeg"},
-    {"name": "Hauptgerichte", "imageName": "hauptgerichte.jpg"},
-    {"name": "Brote", "imageName": "brote.jpg"},
-    {"name": "Süßspeisen", "imageName": "sweets.jpg"},
-    {"name": "Getränke", "imageName": "drinks.jpg"},
-    {"name": "Sonstiges", "imageName": "sonstiges.jpg"},
+    {"name": "Salate", "imageName": "salad.jpeg", "newRecipeTitle": "Neuer Salat"},
+    {"name": "Hauptgerichte", "imageName": "hauptgerichte.jpg", "newRecipeTitle": "Neues Hauptgericht"},
+    {"name": "Brote", "imageName": "brote.jpg", "newRecipeTitle": "Neues Brot"},
+    {"name": "Süßspeisen", "imageName": "sweets.jpg", "newRecipeTitle": "Neue Süßspeise"},
+    {"name": "Getränke", "imageName": "drinks.jpg", "newRecipeTitle": "Neues Getränk"},
+    {"name": "Sonstiges", "imageName": "sonstiges.jpg", "newRecipeTitle": "Neues Rezept"},
   ];
 
   @override
@@ -36,7 +36,7 @@ class Categories extends StatelessWidget {
                     child: InkWell(
                       splashColor: Theme.of(context).colorScheme.primary,
                       onTap: () {
-                        Navigator.pushNamed(context, '/recipes');
+                        Navigator.pushNamed(context, '/recipes', arguments: ScreenArguments(category["name"]));
                       },
                       child: Stack(
                         children: [
@@ -89,7 +89,8 @@ class Categories extends StatelessWidget {
                         Navigator.pushNamed(
                           context,
                           '/newRecipe',
-                          arguments: ScreenArguments(categories[i]["name"]),
+                          arguments:
+                              ScreenArguments(categories[i]["name"], newRecipeTitle: categories[i]["newRecipeTitle"]),
                         );
                       },
                       child: Column(children: [

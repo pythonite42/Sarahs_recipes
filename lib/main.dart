@@ -24,20 +24,22 @@ class MyApp extends StatelessWidget {
         if (settings.name == '/') {
           return MaterialPageRoute(
             builder: (context) {
-              return MyScaffold(body: Categories());
+              return MyScaffold(pageTitle: "Meine Rezepte", body: Categories());
             },
           );
         } else if (settings.name == '/newRecipe') {
           final args = settings.arguments as ScreenArguments;
           return MaterialPageRoute(
             builder: (context) {
-              return MyScaffold(body: NewRecipe(category: args.category));
+              return MyScaffold(
+                  pageTitle: args.newRecipeTitle ?? "Neues Rezeppt", body: NewRecipe(category: args.category));
             },
           );
         } else if (settings.name == '/recipes') {
+          final args = settings.arguments as ScreenArguments;
           return MaterialPageRoute(
             builder: (context) {
-              return MyScaffold(body: Recipes());
+              return MyScaffold(pageTitle: args.category, body: Recipes(category: args.category));
             },
           );
         }
@@ -48,9 +50,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MyScaffold extends StatelessWidget {
-  const MyScaffold({super.key, required this.body, this.floatingActionButton = false});
+  const MyScaffold({super.key, required this.body, required this.pageTitle, this.floatingActionButton = false});
 
   final Widget body;
+  final String pageTitle;
   final bool floatingActionButton;
   @override
   Widget build(BuildContext context) {
@@ -59,7 +62,7 @@ class MyScaffold extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Theme.of(context).colorScheme.onSecondary,
         centerTitle: true,
-        title: Text("Meine Rezepte", style: GoogleFonts.indieFlower(fontSize: 30)),
+        title: Text(pageTitle, style: GoogleFonts.indieFlower(fontSize: 30)),
       ),
       body: body,
     );
@@ -68,6 +71,7 @@ class MyScaffold extends StatelessWidget {
 
 class ScreenArguments {
   final String category;
+  final String? newRecipeTitle;
 
-  ScreenArguments(this.category);
+  ScreenArguments(this.category, {this.newRecipeTitle});
 }

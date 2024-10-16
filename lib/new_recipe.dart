@@ -186,14 +186,9 @@ class _NewRecipeState extends State<NewRecipe> {
         child: Form(
           key: _formKey,
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             child: Column(
               children: [
-                Text(
-                  "Neues Rezept in ${widget.category}",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
-                ),
-                SizedBox(height: 30),
                 TextFormField(
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
