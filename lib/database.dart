@@ -28,9 +28,9 @@ class MySQL {
         }
 
         var cmd = await db.prepare(
-          'INSERT INTO recipe (name, category, instructions) values (?, ?, ?)',
+          'INSERT INTO recipe (name, category, quantity, quantity_name, instructions) values (?, ?, ?, ?, ?)',
         );
-        await cmd.execute([recipe.name, recipe.category, recipe.instructions]);
+        await cmd.execute([recipe.name, recipe.category, recipe.quantity, recipe.quantityName, recipe.instructions]);
         await cmd.deallocate();
         var result = await db.execute('SELECT last_insert_id()');
         int? id;
@@ -78,7 +78,8 @@ class MySQL {
         for (final row in result.rows) {
           //normal counting loop not possible because result.rows[i] throws error
           Map content = row.assoc();
-          recipesList.add(Recipe(content["name"], images[i], content["category"], [], content["instructions"]));
+          recipesList.add(Recipe(content["name"], images[i], content["category"], content["quantity"],
+              content["quantity_name"], [], content["instructions"]));
           i += 1;
         }
         return recipesList;

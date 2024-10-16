@@ -17,6 +17,8 @@ class _NewRecipeState extends State<NewRecipe> {
   var amountTECs = <int, TextEditingController>{};
   var unitTECs = <int, TextEditingController>{};
   var nameTECs = <int, TextEditingController>{};
+  dynamic recipeQuantityController;
+  dynamic recipeQuantityNameController;
   var instructionsController = TextEditingController();
   File? image;
 
@@ -25,6 +27,18 @@ class _NewRecipeState extends State<NewRecipe> {
   var item = <int, Widget>{};
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.category == "Süßspeisen") {
+      recipeQuantityController = TextEditingController(text: "28");
+      recipeQuantityNameController = TextEditingController(text: "Torte");
+    } else {
+      recipeQuantityController = TextEditingController(text: "4");
+      recipeQuantityNameController = TextEditingController(text: "Personen");
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -48,13 +62,13 @@ class _NewRecipeState extends State<NewRecipe> {
             SizedBox(
               width: MediaQuery.sizeOf(context).width / 8,
               child: TextFormField(
-                focusNode: focusNode,
-                controller: amountController,
-                decoration: InputDecoration(
-                  hintText: 'Menge',
-                  hintStyle: TextStyle(fontWeight: FontWeight.w300),
-                ),
-                textInputAction: TextInputAction.next,
+                  focusNode: focusNode,
+                  controller: amountController,
+                  decoration: InputDecoration(
+                    hintText: 'Menge',
+                    hintStyle: TextStyle(fontWeight: FontWeight.w300),
+                  ),
+                  textInputAction: TextInputAction.next,
                   keyboardType: TextInputType.number),
             ),
             SizedBox(
@@ -246,6 +260,35 @@ class _NewRecipeState extends State<NewRecipe> {
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text("Für "),
+                            SizedBox(
+                              width: MediaQuery.sizeOf(context).width / 8,
+                              child: TextFormField(
+                                  controller: recipeQuantityController,
+                                  decoration: InputDecoration(
+                                    hintText: 'Anzahl',
+                                    hintStyle: TextStyle(fontWeight: FontWeight.w300),
+                                  ),
+                                  textInputAction: TextInputAction.next,
+                                  keyboardType: TextInputType.number),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.sizeOf(context).width / 3,
+                              child: TextFormField(
+                                controller: recipeQuantityNameController,
+                                decoration: InputDecoration(
+                                  hintText: 'Bezeichnung',
+                                  hintStyle: TextStyle(fontWeight: FontWeight.w300),
+                                ),
+                                textInputAction: TextInputAction.next,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
                         ListView.builder(
                             shrinkWrap: true,
                             physics: ScrollPhysics(),
@@ -304,9 +347,14 @@ class _NewRecipeState extends State<NewRecipe> {
                           ingredients.add(Ingredient(amountDouble, unit, name));
                         }
                       }
+                      double? quantityDouble;
+                      if (recipeQuantityController.value.text != null && recipeQuantityController.value.text != "") {
+                        quantityDouble = double.parse(recipeQuantityController.value.text.replaceAll(",", "."));
+                        quantityDouble = double.parse(quantityDouble.toStringAsFixed(1));
+                      }
 
-                      Recipe recipe = Recipe(titleController.value.text, image, widget.category, ingredients,
-                          instructionsController.value.text);
+                      Recipe recipe = Recipe(titleController.value.text, image, widget.category, quantityDouble,
+                          recipeQuantityNameController.value.text, ingredients, instructionsController.value.text);
                       showDialog(
                         useRootNavigator: false,
                         context: context,
@@ -381,8 +429,10 @@ class Recipe {
   final String name;
   final File? image;
   final String category;
+  final double? quantity;
+  final String? quantityName;
   final List<Ingredient> ingredients;
   final String? instructions;
 
-  Recipe(this.name, this.image, this.category, this.ingredients, this.instructions);
+  Recipe(this.name, this.image, this.category, this.quantity, this.quantityName, this.ingredients, this.instructions);
 }
