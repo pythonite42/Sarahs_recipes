@@ -15,7 +15,7 @@ class _RecipesState extends State<Recipes> {
   late Future<void> initRecipesData;
 
   Future<void> initRecipes() async {
-    var queryResult = await MySQL().getRecipes();
+    var queryResult = await MySQL().getRecipesByCategory(widget.category);
     if (queryResult is List) {
       recipes = List<Recipe>.from(queryResult);
     }
@@ -32,27 +32,82 @@ class _RecipesState extends State<Recipes> {
     return FutureBuilder(
         future: initRecipesData,
         builder: (BuildContext context, snapshot) {
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                Text("TEst"),
-                for (var recipe in recipes)
-                  Row(
-                    children: [
-                      if (recipe.image != null)
-                        Image.file(
-                          recipe.image!,
-                          width: 200,
-                          height: 50,
-                        ),
-                      Text(recipe.name),
-                      Text(recipe.category),
-                      Text(recipe.instructions ?? "")
-                    ],
-                  )
-              ],
-            ),
-          );
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+            case ConnectionState.active:
+              {
+                return Center(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: Theme.of(context).primaryColor),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const Text("Loading ..."),
+                  ],
+                ));
+              }
+            case ConnectionState.done:
+              {
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.all(30),
+                    child: Column(
+                      children: [
+                        for (var recipe in recipes)
+                          Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  print("go to recipe page");
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: 90,
+                                      height: 90,
+                                      child: Material(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                        ),
+                                        clipBehavior: Clip.antiAliasWithSaveLayer,
+                                        child: (recipe.image != null)
+                                            ? Image.file(
+                                                recipe.image!,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Ink.image(
+                                                image: AssetImage('assets/missing_image.jpg'),
+                                                fit: BoxFit.cover,
+                                              ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                    Text(
+                                      recipe.name,
+                                      style: TextStyle(fontSize: 20),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (recipes.last.name != recipe.name)
+                                Divider(
+                                  height: 30,
+                                  thickness: 0.3,
+                                )
+                            ],
+                          )
+                      ],
+                    ),
+                  ),
+                );
+              }
+          }
         });
   }
 }
