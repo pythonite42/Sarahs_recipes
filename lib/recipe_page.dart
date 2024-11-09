@@ -25,10 +25,12 @@ class _RecipePageState extends State<RecipePage> {
   var instructionsController = TextEditingController();
   File? image;
 
+  double? quantityFromDatabase;
+
   List<Ingredient> ingredients = [];
   late Future<void> initIngredientsData;
 
-  var item = <int, Widget>{};
+  var ingredientWidgets = <int, Widget>{};
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -38,9 +40,9 @@ class _RecipePageState extends State<RecipePage> {
       ingredients = List<Ingredient>.from(queryResult);
     }
     if (mounted) {
-      item = <int, Widget>{};
+      ingredientWidgets = <int, Widget>{};
       for (final (i, ingredient) in ingredients.indexed) {
-        item.addAll({ingredient.entryNumber ?? i: newMethod(context, 0, FocusNode(), ingredient)});
+        ingredientWidgets.addAll({ingredient.entryNumber ?? i: newMethod(context, 0, FocusNode(), ingredient)});
       }
     }
   }
@@ -51,7 +53,12 @@ class _RecipePageState extends State<RecipePage> {
     initIngredientsData = initIngredients();
     titleController.text = widget.recipe.name;
     if (widget.recipe.quantity != null) {
-      recipeQuantityController.text = widget.recipe.quantity!.toString();
+      if (widget.recipe.quantity! % 1 == 0) {
+        recipeQuantityController.text = widget.recipe.quantity!.toInt().toString();
+      } else {
+        recipeQuantityController.text = widget.recipe.quantity!.toString();
+      }
+      quantityFromDatabase = widget.recipe.quantity;
     }
     if (widget.recipe.quantityName != null) {
       recipeQuantityNameController.text = widget.recipe.quantityName!;
@@ -65,13 +72,17 @@ class _RecipePageState extends State<RecipePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    item.addAll({0: newMethod(context, 0, FocusNode(), null)});
+    ingredientWidgets.addAll({0: newMethod(context, 0, FocusNode(), null)});
   }
 
   newMethod(BuildContext context, int index, FocusNode focusNode, Ingredient? ingredient) {
     var amountController = TextEditingController();
     if (ingredient?.amount != null) {
-      amountController.text = ingredient!.amount.toString();
+      if (ingredient!.amount! % 1 == 0) {
+        amountController.text = ingredient.amount!.toInt().toString();
+      } else {
+        amountController.text = ingredient.amount.toString();
+      }
     }
     var unitController = TextEditingController();
     if (ingredient?.unit != null) {
@@ -131,7 +142,10 @@ class _RecipePageState extends State<RecipePage> {
                       },
                       onFieldSubmitted: (value) {
                         var newFocusNode = FocusNode();
-                        item.addAll({item.keys.last + 1: newMethod(context, item.keys.last + 1, newFocusNode, null)});
+                        ingredientWidgets.addAll({
+                          ingredientWidgets.keys.last + 1:
+                              newMethod(context, ingredientWidgets.keys.last + 1, newFocusNode, null)
+                        });
                         setState(() {});
                         newFocusNode.requestFocus();
                       },
@@ -149,13 +163,13 @@ class _RecipePageState extends State<RecipePage> {
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      item.removeWhere((key, value) => key == index);
+                      ingredientWidgets.removeWhere((key, value) => key == index);
                       amountTECs.removeWhere((key, value) => key == index);
                       unitTECs.removeWhere((key, value) => key == index);
                       nameTECs.removeWhere((key, value) => key == index);
                     });
-                    if (item.isEmpty) {
-                      item.addAll({0: newMethod(context, 0, FocusNode(), null)});
+                    if (ingredientWidgets.isEmpty) {
+                      ingredientWidgets.addAll({0: newMethod(context, 0, FocusNode(), null)});
                     }
                   },
                   child: Icon(
@@ -308,13 +322,37 @@ class _RecipePageState extends State<RecipePage> {
                                         SizedBox(
                                           width: MediaQuery.sizeOf(context).width / 8,
                                           child: TextFormField(
-                                              controller: recipeQuantityController,
-                                              decoration: InputDecoration(
-                                                hintText: 'Anzahl',
-                                                hintStyle: TextStyle(fontWeight: FontWeight.w300),
-                                              ),
-                                              textInputAction: TextInputAction.next,
-                                              keyboardType: TextInputType.number),
+                                            controller: recipeQuantityController,
+                                            decoration: InputDecoration(
+                                              hintText: 'Anzahl',
+                                              hintStyle: TextStyle(fontWeight: FontWeight.w300),
+                                            ),
+                                            textInputAction: (isInEditMode) ? TextInputAction.next : null,
+                                            keyboardType: TextInputType.number,
+                                            onFieldSubmitted: (newValue) {
+                                              ingredientWidgets = <int, Widget>{};
+
+                                              var newValueDouble = double.parse(newValue.replaceAll(",", "."));
+                                              newValueDouble = double.parse(newValueDouble.toStringAsFixed(1));
+
+                                              for (final (i, ingredient) in ingredients.indexed) {
+                                                var newIngredient = ingredient;
+                                                if (ingredient.amount != null && quantityFromDatabase != null) {
+                                                  double newAmount = double.parse(
+                                                      (ingredient.amount! * newValueDouble / quantityFromDatabase!)
+                                                          .toStringAsFixed(1));
+                                                  newIngredient = Ingredient(ingredient.entryNumber, newAmount,
+                                                      ingredient.unit, ingredient.name);
+                                                }
+
+                                                ingredientWidgets.addAll({
+                                                  ingredient.entryNumber ?? i:
+                                                      newMethod(context, 0, FocusNode(), newIngredient)
+                                                });
+                                              }
+                                              setState(() {});
+                                            },
+                                          ),
                                         ),
                                         SizedBox(
                                           width: MediaQuery.sizeOf(context).width / 3,
@@ -335,9 +373,9 @@ class _RecipePageState extends State<RecipePage> {
                                     ListView.builder(
                                         shrinkWrap: true,
                                         physics: ScrollPhysics(),
-                                        itemCount: item.length,
+                                        itemCount: ingredientWidgets.length,
                                         itemBuilder: (context, index) {
-                                          return item.values.elementAt(index);
+                                          return ingredientWidgets.values.elementAt(index);
                                         }),
                                   ],
                                 ),
