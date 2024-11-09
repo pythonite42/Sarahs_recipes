@@ -20,6 +20,44 @@ class MySQL {
     }
   }
 
+  Future editEntry(Recipe recipe) async {
+    try {
+      return await initializeDB((db) async {
+        if (db.runtimeType == String) {
+          return db;
+        }
+        if (recipe.id == null) {
+          return "Das Rezept hat keine ID und kann deshalb nicht verändert werden.";
+        }
+        var cmdUpdate = await db.prepare(
+          'UPDATE recipe SET name=?, quantity=?, quantity_name=?, instructions=? WHERE id=?',
+        );
+        await cmdUpdate.execute([recipe.name, recipe.quantity, recipe.quantityName, recipe.instructions, recipe.id]);
+        await cmdUpdate.deallocate();
+
+        var cmdDelete = await db.prepare(
+          'DELETE FROM ingredient WHERE recipe_id=?',
+        );
+        await cmdDelete.execute([recipe.id]);
+        await cmdDelete.deallocate();
+
+        var cmdInsert = await db.prepare(
+          'INSERT INTO ingredient (recipe_id, entry_number, amount, unit, name) values (?, ?, ?, ?, ?)',
+        );
+        for (final ingredient in recipe.ingredients) {
+          await cmdInsert
+              .execute([recipe.id, ingredient.entryNumber, ingredient.amount, ingredient.unit, ingredient.name]);
+        }
+        await cmdInsert.deallocate();
+
+        await SSH().uploadImage(recipe, recipe.id!);
+        return true;
+      });
+    } catch (_) {
+      return _.toString();
+    }
+  }
+
   Future recipeEntry(Recipe recipe) async {
     try {
       return await initializeDB((db) async {

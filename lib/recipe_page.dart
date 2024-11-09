@@ -330,27 +330,29 @@ class _RecipePageState extends State<RecipePage> {
                                             textInputAction: (isInEditMode) ? TextInputAction.next : null,
                                             keyboardType: TextInputType.number,
                                             onFieldSubmitted: (newValue) {
-                                              ingredientWidgets = <int, Widget>{};
+                                              if (!isInEditMode) {
+                                                ingredientWidgets = <int, Widget>{};
 
-                                              var newValueDouble = double.parse(newValue.replaceAll(",", "."));
-                                              newValueDouble = double.parse(newValueDouble.toStringAsFixed(1));
+                                                var newValueDouble = double.parse(newValue.replaceAll(",", "."));
+                                                newValueDouble = double.parse(newValueDouble.toStringAsFixed(1));
 
-                                              for (final (i, ingredient) in ingredients.indexed) {
-                                                var newIngredient = ingredient;
-                                                if (ingredient.amount != null && quantityFromDatabase != null) {
-                                                  double newAmount = double.parse(
-                                                      (ingredient.amount! * newValueDouble / quantityFromDatabase!)
-                                                          .toStringAsFixed(1));
-                                                  newIngredient = Ingredient(ingredient.entryNumber, newAmount,
-                                                      ingredient.unit, ingredient.name);
+                                                for (final (i, ingredient) in ingredients.indexed) {
+                                                  var newIngredient = ingredient;
+                                                  if (ingredient.amount != null && quantityFromDatabase != null) {
+                                                    double newAmount = double.parse(
+                                                        (ingredient.amount! * newValueDouble / quantityFromDatabase!)
+                                                            .toStringAsFixed(1));
+                                                    newIngredient = Ingredient(ingredient.entryNumber, newAmount,
+                                                        ingredient.unit, ingredient.name);
+                                                  }
+
+                                                  ingredientWidgets.addAll({
+                                                    ingredient.entryNumber ?? i:
+                                                        newMethod(context, 0, FocusNode(), newIngredient)
+                                                  });
                                                 }
-
-                                                ingredientWidgets.addAll({
-                                                  ingredient.entryNumber ?? i:
-                                                      newMethod(context, 0, FocusNode(), newIngredient)
-                                                });
+                                                setState(() {});
                                               }
-                                              setState(() {});
                                             },
                                           ),
                                         ),
@@ -414,93 +416,158 @@ class _RecipePageState extends State<RecipePage> {
                             ),
                             SizedBox(height: 30),
                             (isInEditMode)
-                                ? ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: Theme.of(context).colorScheme.secondary,
-                                        textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
-                                    onPressed: () async {
-                                      if (_formKey.currentState!.validate()) {
-                                        ingredients.clear();
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                            backgroundColor: Theme.of(context).colorScheme.secondary,
+                                            textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
+                                        onPressed: () async {
+                                          if (_formKey.currentState!.validate()) {
+                                            ingredients.clear();
 
-                                        for (int i = 0; i <= nameTECs.keys.last; i++) {
-                                          var amount = amountTECs[i]?.value.text;
-                                          var unit = unitTECs[i]?.value.text;
-                                          var name = nameTECs[i]?.value.text;
+                                            for (int i = 0; i <= nameTECs.keys.last; i++) {
+                                              var amount = amountTECs[i]?.value.text;
+                                              var unit = unitTECs[i]?.value.text;
+                                              var name = nameTECs[i]?.value.text;
 
-                                          if (name != null && name != "") {
-                                            double? amountDouble;
-                                            if (amount != null) {
-                                              amountDouble = double.parse(amount.replaceAll(",", "."));
-                                              amountDouble = double.parse(amountDouble.toStringAsFixed(1));
+                                              if (name != null && name != "") {
+                                                double? amountDouble;
+                                                if (amount != null) {
+                                                  amountDouble = double.parse(amount.replaceAll(",", "."));
+                                                  amountDouble = double.parse(amountDouble.toStringAsFixed(1));
+                                                }
+                                                ingredients.add(Ingredient(i, amountDouble, unit, name));
+                                              }
                                             }
-                                            ingredients.add(Ingredient(i, amountDouble, unit, name));
-                                          }
-                                        }
-                                        double? quantityDouble;
-                                        if (recipeQuantityController.value.text != null &&
-                                            recipeQuantityController.value.text != "") {
-                                          quantityDouble =
-                                              double.parse(recipeQuantityController.value.text.replaceAll(",", "."));
-                                          quantityDouble = double.parse(quantityDouble.toStringAsFixed(1));
-                                        }
+                                            double? quantityDouble;
+                                            if (recipeQuantityController.value.text != null &&
+                                                recipeQuantityController.value.text != "") {
+                                              quantityDouble = double.parse(
+                                                  recipeQuantityController.value.text.replaceAll(",", "."));
+                                              quantityDouble = double.parse(quantityDouble.toStringAsFixed(1));
+                                            }
 
-                                        Recipe recipe = Recipe(
-                                            widget.recipe.id,
-                                            titleController.value.text,
-                                            image,
-                                            widget.recipe.category,
-                                            quantityDouble,
-                                            recipeQuantityNameController.value.text,
-                                            ingredients,
-                                            instructionsController.value.text);
-                                        showDialog(
-                                          useRootNavigator: false,
-                                          context: context,
-                                          builder: (_) {
-                                            return AlertDialog(
-                                              content: Row(
-                                                children: [
-                                                  CircularProgressIndicator(color: Theme.of(context).primaryColor),
-                                                  const SizedBox(
-                                                    width: 20,
-                                                  ),
-                                                  const Text("Loading ..."),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                          barrierDismissible: false,
-                                        );
-                                        var result = await MySQL().recipeEntry(recipe);
-                                        setState(() {});
-                                        if (context.mounted) {
-                                          Navigator.pop(context);
-                                          if (result != true) {
+                                            Recipe recipe = Recipe(
+                                                widget.recipe.id,
+                                                titleController.value.text,
+                                                image,
+                                                widget.recipe.category,
+                                                quantityDouble,
+                                                recipeQuantityNameController.value.text,
+                                                ingredients,
+                                                instructionsController.value.text);
                                             showDialog(
                                               useRootNavigator: false,
                                               context: context,
                                               builder: (_) {
                                                 return AlertDialog(
-                                                  title: Text("Fehlermeldung"),
-                                                  content: Text(result.toString()),
+                                                  content: Row(
+                                                    children: [
+                                                      CircularProgressIndicator(color: Theme.of(context).primaryColor),
+                                                      const SizedBox(
+                                                        width: 20,
+                                                      ),
+                                                      const Text("Loading ..."),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                              barrierDismissible: false,
+                                            );
+                                            var result = await MySQL().editEntry(recipe);
+                                            setState(() {});
+                                            if (context.mounted) {
+                                              Navigator.pop(context);
+                                              if (result != true) {
+                                                showDialog(
+                                                  useRootNavigator: false,
+                                                  context: context,
+                                                  builder: (_) {
+                                                    return AlertDialog(
+                                                      title: Text("Fehlermeldung"),
+                                                      content: Text(result.toString()),
+                                                      actions: [
+                                                        TextButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(context);
+                                                            },
+                                                            child: const Text("Okay")),
+                                                      ],
+                                                    );
+                                                  },
+                                                  barrierDismissible: false,
+                                                );
+                                              } else {
+                                                Navigator.pop(context);
+                                                Navigator.pop(context);
+                                              }
+                                            }
+                                          }
+                                        },
+                                        child: Text('Speichern'),
+                                      ),
+                                      ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                              backgroundColor: Theme.of(context).colorScheme.secondary,
+                                              textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
+                                          onPressed: () {
+                                            showDialog(
+                                              useRootNavigator: false,
+                                              context: context,
+                                              builder: (_) {
+                                                return AlertDialog(
+                                                  content: Text("Willst du alle Änderungen verwerfen?"),
                                                   actions: [
                                                     TextButton(
                                                         onPressed: () {
                                                           Navigator.pop(context);
+                                                          setState(() {
+                                                            isInEditMode = false;
+                                                            titleController.text = widget.recipe.name;
+                                                            if (widget.recipe.quantity != null) {
+                                                              if (widget.recipe.quantity! % 1 == 0) {
+                                                                recipeQuantityController.text =
+                                                                    widget.recipe.quantity!.toInt().toString();
+                                                              } else {
+                                                                recipeQuantityController.text =
+                                                                    widget.recipe.quantity!.toString();
+                                                              }
+                                                              quantityFromDatabase = widget.recipe.quantity;
+                                                            }
+                                                            if (widget.recipe.quantityName != null) {
+                                                              recipeQuantityNameController.text =
+                                                                  widget.recipe.quantityName!;
+                                                            }
+                                                            if (widget.recipe.instructions != null) {
+                                                              instructionsController.text = widget.recipe.instructions!;
+                                                            }
+                                                            image = widget.recipe.image;
+
+                                                            ingredientWidgets = <int, Widget>{};
+                                                            for (final (i, ingredient) in ingredients.indexed) {
+                                                              ingredientWidgets.addAll({
+                                                                ingredient.entryNumber ?? i:
+                                                                    newMethod(context, 0, FocusNode(), ingredient)
+                                                              });
+                                                            }
+                                                          });
                                                         },
-                                                        child: const Text("Okay")),
+                                                        child: const Text("Ja, Änderungen verwerfen")),
+                                                    TextButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(context);
+                                                        },
+                                                        child: const Text("Abbrechen")),
                                                   ],
                                                 );
                                               },
                                               barrierDismissible: false,
                                             );
-                                          } else {
-                                            Navigator.pop(context);
-                                          }
-                                        }
-                                      }
-                                    },
-                                    child: Text('Speichern'),
+                                          },
+                                          child: Text("Abbrechen"))
+                                    ],
                                   )
                                 : ElevatedButton(
                                     style: ElevatedButton.styleFrom(
@@ -508,6 +575,7 @@ class _RecipePageState extends State<RecipePage> {
                                         textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
                                     onPressed: () {
                                       setState(() {
+                                        isInEditMode = true;
                                         if (widget.recipe.quantity != null) {
                                           if (widget.recipe.quantity! % 1 == 0) {
                                             recipeQuantityController.text = widget.recipe.quantity!.toInt().toString();
@@ -521,7 +589,9 @@ class _RecipePageState extends State<RecipePage> {
                                             ingredient.entryNumber ?? i: newMethod(context, 0, FocusNode(), ingredient)
                                           });
                                         }
-                                        isInEditMode = true;
+                                        if (ingredientWidgets.isEmpty) {
+                                          ingredientWidgets.addAll({0: newMethod(context, 0, FocusNode(), null)});
+                                        }
                                       });
                                     },
                                     child: Text("Bearbeiten")),
