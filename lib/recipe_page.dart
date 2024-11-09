@@ -235,14 +235,14 @@ class _RecipePageState extends State<RecipePage> {
                         context: context,
                         builder: (_) {
                           return AlertDialog(
-                            content: Text("Willst du alle Eingaben löschen?"),
+                            content: Text("Willst du alle Änderungen verwerfen?"),
                             actions: [
                               TextButton(
                                   onPressed: () {
                                     Navigator.pop(context);
                                     Navigator.pop(context);
                                   },
-                                  child: const Text("Ja, alles löschen")),
+                                  child: const Text("Ja, Änderungen verwerfen")),
                               TextButton(
                                   onPressed: () {
                                     Navigator.pop(context);
@@ -412,96 +412,119 @@ class _RecipePageState extends State<RecipePage> {
                                 ]),
                               ),
                             ),
-                            if (isInEditMode) SizedBox(height: 30),
-                            if (isInEditMode)
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
-                                onPressed: () async {
-                                  if (_formKey.currentState!.validate()) {
-                                    ingredients.clear();
+                            SizedBox(height: 30),
+                            (isInEditMode)
+                                ? ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                                        textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
+                                    onPressed: () async {
+                                      if (_formKey.currentState!.validate()) {
+                                        ingredients.clear();
 
-                                    for (int i = 0; i <= nameTECs.keys.last; i++) {
-                                      var amount = amountTECs[i]?.value.text;
-                                      var unit = unitTECs[i]?.value.text;
-                                      var name = nameTECs[i]?.value.text;
+                                        for (int i = 0; i <= nameTECs.keys.last; i++) {
+                                          var amount = amountTECs[i]?.value.text;
+                                          var unit = unitTECs[i]?.value.text;
+                                          var name = nameTECs[i]?.value.text;
 
-                                      if (name != null && name != "") {
-                                        double? amountDouble;
-                                        if (amount != null) {
-                                          amountDouble = double.parse(amount.replaceAll(",", "."));
-                                          amountDouble = double.parse(amountDouble.toStringAsFixed(1));
+                                          if (name != null && name != "") {
+                                            double? amountDouble;
+                                            if (amount != null) {
+                                              amountDouble = double.parse(amount.replaceAll(",", "."));
+                                              amountDouble = double.parse(amountDouble.toStringAsFixed(1));
+                                            }
+                                            ingredients.add(Ingredient(i, amountDouble, unit, name));
+                                          }
                                         }
-                                        ingredients.add(Ingredient(i, amountDouble, unit, name));
-                                      }
-                                    }
-                                    double? quantityDouble;
-                                    if (recipeQuantityController.value.text != null &&
-                                        recipeQuantityController.value.text != "") {
-                                      quantityDouble =
-                                          double.parse(recipeQuantityController.value.text.replaceAll(",", "."));
-                                      quantityDouble = double.parse(quantityDouble.toStringAsFixed(1));
-                                    }
+                                        double? quantityDouble;
+                                        if (recipeQuantityController.value.text != null &&
+                                            recipeQuantityController.value.text != "") {
+                                          quantityDouble =
+                                              double.parse(recipeQuantityController.value.text.replaceAll(",", "."));
+                                          quantityDouble = double.parse(quantityDouble.toStringAsFixed(1));
+                                        }
 
-                                    Recipe recipe = Recipe(
-                                        widget.recipe.id,
-                                        titleController.value.text,
-                                        image,
-                                        widget.recipe.category,
-                                        quantityDouble,
-                                        recipeQuantityNameController.value.text,
-                                        ingredients,
-                                        instructionsController.value.text);
-                                    /* showDialog(
-                                    useRootNavigator: false,
-                                    context: context,
-                                    builder: (_) {
-                                      return AlertDialog(
-                                        content: Row(
-                                          children: [
-                                            CircularProgressIndicator(color: Theme.of(context).primaryColor),
-                                            const SizedBox(
-                                              width: 20,
-                                            ),
-                                            const Text("Loading ..."),
-                                          ],
-                                        ),
-                                      );
+                                        Recipe recipe = Recipe(
+                                            widget.recipe.id,
+                                            titleController.value.text,
+                                            image,
+                                            widget.recipe.category,
+                                            quantityDouble,
+                                            recipeQuantityNameController.value.text,
+                                            ingredients,
+                                            instructionsController.value.text);
+                                        showDialog(
+                                          useRootNavigator: false,
+                                          context: context,
+                                          builder: (_) {
+                                            return AlertDialog(
+                                              content: Row(
+                                                children: [
+                                                  CircularProgressIndicator(color: Theme.of(context).primaryColor),
+                                                  const SizedBox(
+                                                    width: 20,
+                                                  ),
+                                                  const Text("Loading ..."),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                          barrierDismissible: false,
+                                        );
+                                        var result = await MySQL().recipeEntry(recipe);
+                                        setState(() {});
+                                        if (context.mounted) {
+                                          Navigator.pop(context);
+                                          if (result != true) {
+                                            showDialog(
+                                              useRootNavigator: false,
+                                              context: context,
+                                              builder: (_) {
+                                                return AlertDialog(
+                                                  title: Text("Fehlermeldung"),
+                                                  content: Text(result.toString()),
+                                                  actions: [
+                                                    TextButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(context);
+                                                        },
+                                                        child: const Text("Okay")),
+                                                  ],
+                                                );
+                                              },
+                                              barrierDismissible: false,
+                                            );
+                                          } else {
+                                            Navigator.pop(context);
+                                          }
+                                        }
+                                      }
                                     },
-                                    barrierDismissible: false,
-                                  );
-                                  var result = await MySQL().recipeEntry(recipe);
-                                  setState(() {});
-                                  if (context.mounted) {
-                                    Navigator.pop(context);
-                                    if (result != true) {
-                                      showDialog(
-                                        useRootNavigator: false,
-                                        context: context,
-                                        builder: (_) {
-                                          return AlertDialog(
-                                            title: Text("Fehlermeldung"),
-                                            content: Text(result.toString()),
-                                            actions: [
-                                              TextButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: const Text("Okay")),
-                                            ],
-                                          );
-                                        },
-                                        barrierDismissible: false,
-                                      );
-                                    } else {
-                                      Navigator.pop(context);
-                                    }
-                                  } */
-                                  }
-                                },
-                                child: Text('Speichern'),
-                              ),
+                                    child: Text('Speichern'),
+                                  )
+                                : ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                                        textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
+                                    onPressed: () {
+                                      setState(() {
+                                        if (widget.recipe.quantity != null) {
+                                          if (widget.recipe.quantity! % 1 == 0) {
+                                            recipeQuantityController.text = widget.recipe.quantity!.toInt().toString();
+                                          } else {
+                                            recipeQuantityController.text = widget.recipe.quantity!.toString();
+                                          }
+                                        }
+                                        ingredientWidgets = <int, Widget>{};
+                                        for (final (i, ingredient) in ingredients.indexed) {
+                                          ingredientWidgets.addAll({
+                                            ingredient.entryNumber ?? i: newMethod(context, 0, FocusNode(), ingredient)
+                                          });
+                                        }
+                                        isInEditMode = true;
+                                      });
+                                    },
+                                    child: Text("Bearbeiten")),
                           ],
                         ),
                       ),
