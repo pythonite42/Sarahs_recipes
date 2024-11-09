@@ -36,7 +36,8 @@ class Categories extends StatelessWidget {
                     child: InkWell(
                       splashColor: Theme.of(context).colorScheme.primary,
                       onTap: () {
-                        Navigator.pushNamed(context, '/recipes', arguments: ScreenArguments(category["name"]));
+                        Navigator.pushNamed(context, '/recipes',
+                            arguments: ScreenArguments(category: category["name"]));
                       },
                       child: Stack(
                         children: [
@@ -89,8 +90,8 @@ class Categories extends StatelessWidget {
                         Navigator.pushNamed(
                           context,
                           '/newRecipe',
-                          arguments:
-                              ScreenArguments(categories[i]["name"], newRecipeTitle: categories[i]["newRecipeTitle"]),
+                          arguments: ScreenArguments(
+                              category: categories[i]["name"], newRecipeTitle: categories[i]["newRecipeTitle"]),
                         );
                       },
                       child: Column(children: [

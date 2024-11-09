@@ -1,0 +1,503 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:sarahs_recipes/database.dart';
+import 'package:sarahs_recipes/main.dart';
+
+class RecipePage extends StatefulWidget {
+  const RecipePage({super.key, required this.recipe});
+  final Recipe recipe;
+
+  @override
+  State<RecipePage> createState() => _RecipePageState();
+}
+
+class _RecipePageState extends State<RecipePage> {
+  bool isInEditMode = false;
+
+  var titleController = TextEditingController();
+  var amountTECs = <int, TextEditingController>{};
+  var unitTECs = <int, TextEditingController>{};
+  var nameTECs = <int, TextEditingController>{};
+  var recipeQuantityController = TextEditingController();
+  var recipeQuantityNameController = TextEditingController();
+  var instructionsController = TextEditingController();
+  File? image;
+
+  List<Ingredient> ingredients = [];
+  late Future<void> initIngredientsData;
+
+  var item = <int, Widget>{};
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  Future<void> initIngredients() async {
+    var queryResult = await MySQL().getIngredientsById(widget.recipe.id);
+    if (queryResult is List) {
+      ingredients = List<Ingredient>.from(queryResult);
+    }
+    if (mounted) {
+      item = <int, Widget>{};
+      for (final (i, ingredient) in ingredients.indexed) {
+        item.addAll({ingredient.entryNumber ?? i: newMethod(context, 0, FocusNode(), ingredient)});
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initIngredientsData = initIngredients();
+    titleController.text = widget.recipe.name;
+    if (widget.recipe.quantity != null) {
+      recipeQuantityController.text = widget.recipe.quantity!.toString();
+    }
+    if (widget.recipe.quantityName != null) {
+      recipeQuantityNameController.text = widget.recipe.quantityName!;
+    }
+    if (widget.recipe.instructions != null) {
+      instructionsController.text = widget.recipe.instructions!;
+    }
+    image = widget.recipe.image;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    item.addAll({0: newMethod(context, 0, FocusNode(), null)});
+  }
+
+  newMethod(BuildContext context, int index, FocusNode focusNode, Ingredient? ingredient) {
+    var amountController = TextEditingController();
+    if (ingredient?.amount != null) {
+      amountController.text = ingredient!.amount.toString();
+    }
+    var unitController = TextEditingController();
+    if (ingredient?.unit != null) {
+      unitController.text = ingredient!.unit!;
+    }
+    var nameController = TextEditingController();
+    if (ingredient?.name != null) {
+      nameController.text = ingredient!.name;
+    }
+    amountTECs.addAll({index: amountController});
+    unitTECs.addAll({index: unitController});
+    nameTECs.addAll({index: nameController});
+    return Column(
+      children: [
+        SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              width: MediaQuery.sizeOf(context).width / 8,
+              child: isInEditMode
+                  ? TextFormField(
+                      focusNode: focusNode,
+                      controller: amountController,
+                      decoration: InputDecoration(
+                        hintText: 'Menge',
+                        hintStyle: TextStyle(fontWeight: FontWeight.w300),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.number)
+                  : Text(amountController.text),
+            ),
+            SizedBox(
+              width: MediaQuery.sizeOf(context).width / 8,
+              child: isInEditMode
+                  ? TextFormField(
+                      controller: unitController,
+                      decoration: InputDecoration(
+                        hintText: 'Einheit',
+                        hintStyle: TextStyle(fontWeight: FontWeight.w300),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      textCapitalization: TextCapitalization.characters,
+                    )
+                  : Text(unitController.text),
+            ),
+            SizedBox(
+              width: MediaQuery.sizeOf(context).width / 2.5,
+              child: isInEditMode
+                  ? TextFormField(
+                      controller: nameController,
+                      validator: (value) {
+                        return value!.isEmpty &&
+                                (amountController.value.text.isNotEmpty || unitController.value.text.isNotEmpty)
+                            ? 'Zutat eingeben'
+                            : null;
+                      },
+                      onFieldSubmitted: (value) {
+                        var newFocusNode = FocusNode();
+                        item.addAll({item.keys.last + 1: newMethod(context, item.keys.last + 1, newFocusNode, null)});
+                        setState(() {});
+                        newFocusNode.requestFocus();
+                      },
+                      decoration: InputDecoration(hintText: 'Zutat', hintStyle: TextStyle(fontWeight: FontWeight.w300)),
+                      textCapitalization: TextCapitalization.words,
+                    )
+                  : Text(nameController.text),
+            ),
+            if (isInEditMode)
+              Visibility(
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                visible: true,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      item.removeWhere((key, value) => key == index);
+                      amountTECs.removeWhere((key, value) => key == index);
+                      unitTECs.removeWhere((key, value) => key == index);
+                      nameTECs.removeWhere((key, value) => key == index);
+                    });
+                    if (item.isEmpty) {
+                      item.addAll({0: newMethod(context, 0, FocusNode(), null)});
+                    }
+                  },
+                  child: Icon(
+                    Icons.delete,
+                    size: 20,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+          ],
+        )
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    for (int i = 0; i <= nameTECs.keys.last; i++) {
+      amountTECs[i]?.dispose();
+      unitTECs[i]?.dispose();
+      nameTECs[i]?.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: initIngredientsData,
+        builder: (BuildContext context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+            case ConnectionState.active:
+              {
+                return Center(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: Theme.of(context).primaryColor),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const Text("Loading ..."),
+                  ],
+                ));
+              }
+            case ConnectionState.done:
+              {
+                return PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (didPop, result) async {
+                    if (didPop) {
+                      return;
+                    }
+                    if (isInEditMode &&
+                        (titleController.value.text.isNotEmpty ||
+                            image != null ||
+                            (nameTECs.keys.isNotEmpty && nameTECs[0]!.value.text.isNotEmpty) ||
+                            instructionsController.value.text.isNotEmpty)) {
+                      showDialog(
+                        useRootNavigator: false,
+                        context: context,
+                        builder: (_) {
+                          return AlertDialog(
+                            content: Text("Willst du alle Eingaben löschen?"),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text("Ja, alles löschen")),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text("Abbrechen")),
+                            ],
+                          );
+                        },
+                        barrierDismissible: false,
+                      );
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: SingleChildScrollView(
+                    child: Form(
+                      key: _formKey,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                        child: Column(
+                          children: [
+                            if (isInEditMode)
+                              TextFormField(
+                                keyboardType: TextInputType.multiline,
+                                maxLines: null,
+                                controller: titleController,
+                                style: GoogleFonts.indieFlower(fontSize: 30),
+                                textAlign: TextAlign.center,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'Titel',
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Füge einen Titel hinzu';
+                                  }
+                                  return null;
+                                },
+                                textCapitalization: TextCapitalization.words,
+                              ),
+                            SizedBox(height: 15),
+                            Column(children: [
+                              isInEditMode
+                                  ? GestureDetector(
+                                      onTap: () async {
+                                        final XFile? pickedImage =
+                                            await ImagePicker().pickImage(source: ImageSource.gallery);
+                                        final pathVar = pickedImage?.path;
+                                        if (pathVar == null) {
+                                          return;
+                                        }
+                                        File file = File(pathVar);
+                                        setState(() {
+                                          image = file;
+                                        });
+                                      },
+                                      child: RecipeImage(image: image))
+                                  : RecipeImage(image: image)
+                            ]),
+                            SizedBox(height: 30),
+                            Card(
+                              elevation: 3,
+                              color: Theme.of(context).colorScheme.surfaceDim,
+                              child: Padding(
+                                padding: EdgeInsets.all(20),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "Zutaten",
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(height: 10),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text("Für "),
+                                        SizedBox(
+                                          width: MediaQuery.sizeOf(context).width / 8,
+                                          child: TextFormField(
+                                              controller: recipeQuantityController,
+                                              decoration: InputDecoration(
+                                                hintText: 'Anzahl',
+                                                hintStyle: TextStyle(fontWeight: FontWeight.w300),
+                                              ),
+                                              textInputAction: TextInputAction.next,
+                                              keyboardType: TextInputType.number),
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.sizeOf(context).width / 3,
+                                          child: isInEditMode
+                                              ? TextFormField(
+                                                  controller: recipeQuantityNameController,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Bezeichnung',
+                                                    hintStyle: TextStyle(fontWeight: FontWeight.w300),
+                                                  ),
+                                                  textInputAction: TextInputAction.next,
+                                                )
+                                              : Text(widget.recipe.quantityName ?? ""),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(height: 10),
+                                    ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: ScrollPhysics(),
+                                        itemCount: item.length,
+                                        itemBuilder: (context, index) {
+                                          return item.values.elementAt(index);
+                                        }),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 30),
+                            Card(
+                              elevation: 3,
+                              color: Theme.of(context).colorScheme.surfaceDim,
+                              child: Padding(
+                                padding: EdgeInsets.all(20),
+                                child: Column(children: [
+                                  Text(
+                                    "Zubereitung",
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(height: 20),
+                                  isInEditMode
+                                      ? TextFormField(
+                                          controller: instructionsController,
+                                          decoration: InputDecoration(
+                                            filled: true,
+                                            border: OutlineInputBorder(),
+                                          ),
+                                          maxLines: 15,
+                                          textCapitalization: TextCapitalization.sentences,
+                                        )
+                                      : Container(
+                                          color: Theme.of(context).colorScheme.surface,
+                                          constraints: BoxConstraints(minHeight: 200),
+                                          child: Text(instructionsController.value.text),
+                                        ),
+                                ]),
+                              ),
+                            ),
+                            if (isInEditMode) SizedBox(height: 30),
+                            if (isInEditMode)
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
+                                onPressed: () async {
+                                  if (_formKey.currentState!.validate()) {
+                                    ingredients.clear();
+
+                                    for (int i = 0; i <= nameTECs.keys.last; i++) {
+                                      var amount = amountTECs[i]?.value.text;
+                                      var unit = unitTECs[i]?.value.text;
+                                      var name = nameTECs[i]?.value.text;
+
+                                      if (name != null && name != "") {
+                                        double? amountDouble;
+                                        if (amount != null) {
+                                          amountDouble = double.parse(amount.replaceAll(",", "."));
+                                          amountDouble = double.parse(amountDouble.toStringAsFixed(1));
+                                        }
+                                        ingredients.add(Ingredient(i, amountDouble, unit, name));
+                                      }
+                                    }
+                                    double? quantityDouble;
+                                    if (recipeQuantityController.value.text != null &&
+                                        recipeQuantityController.value.text != "") {
+                                      quantityDouble =
+                                          double.parse(recipeQuantityController.value.text.replaceAll(",", "."));
+                                      quantityDouble = double.parse(quantityDouble.toStringAsFixed(1));
+                                    }
+
+                                    Recipe recipe = Recipe(
+                                        widget.recipe.id,
+                                        titleController.value.text,
+                                        image,
+                                        widget.recipe.category,
+                                        quantityDouble,
+                                        recipeQuantityNameController.value.text,
+                                        ingredients,
+                                        instructionsController.value.text);
+                                    /* showDialog(
+                                    useRootNavigator: false,
+                                    context: context,
+                                    builder: (_) {
+                                      return AlertDialog(
+                                        content: Row(
+                                          children: [
+                                            CircularProgressIndicator(color: Theme.of(context).primaryColor),
+                                            const SizedBox(
+                                              width: 20,
+                                            ),
+                                            const Text("Loading ..."),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                    barrierDismissible: false,
+                                  );
+                                  var result = await MySQL().recipeEntry(recipe);
+                                  setState(() {});
+                                  if (context.mounted) {
+                                    Navigator.pop(context);
+                                    if (result != true) {
+                                      showDialog(
+                                        useRootNavigator: false,
+                                        context: context,
+                                        builder: (_) {
+                                          return AlertDialog(
+                                            title: Text("Fehlermeldung"),
+                                            content: Text(result.toString()),
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: const Text("Okay")),
+                                            ],
+                                          );
+                                        },
+                                        barrierDismissible: false,
+                                      );
+                                    } else {
+                                      Navigator.pop(context);
+                                    }
+                                  } */
+                                  }
+                                },
+                                child: Text('Speichern'),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
+          }
+        });
+  }
+}
+
+class RecipeImage extends StatelessWidget {
+  const RecipeImage({super.key, required this.image});
+  final File? image;
+
+  @override
+  Widget build(BuildContext context) {
+    return (image != null)
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.file(
+              image!,
+              fit: BoxFit.cover,
+            ))
+        : Container(
+            width: MediaQuery.sizeOf(context).width * 0.5,
+            height: MediaQuery.sizeOf(context).width * 0.3,
+            decoration: ShapeDecoration(
+                color: Colors.black12, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+            child: Icon(
+              Icons.photo,
+              size: MediaQuery.sizeOf(context).width * 0.15,
+              color: Colors.grey,
+            ),
+          );
+  }
+}

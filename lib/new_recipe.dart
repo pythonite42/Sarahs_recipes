@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sarahs_recipes/database.dart';
+import 'package:sarahs_recipes/main.dart';
 
 class NewRecipe extends StatefulWidget {
   const NewRecipe({super.key, required this.category});
@@ -339,7 +340,7 @@ class _NewRecipeState extends State<NewRecipe> {
                             amountDouble = double.parse(amount.replaceAll(",", "."));
                             amountDouble = double.parse(amountDouble.toStringAsFixed(1));
                           }
-                          ingredients.add(Ingredient(amountDouble, unit, name));
+                          ingredients.add(Ingredient(i, amountDouble, unit, name));
                         }
                       }
                       double? quantityDouble;
@@ -348,7 +349,7 @@ class _NewRecipeState extends State<NewRecipe> {
                         quantityDouble = double.parse(quantityDouble.toStringAsFixed(1));
                       }
 
-                      Recipe recipe = Recipe(titleController.value.text, image, widget.category, quantityDouble,
+                      Recipe recipe = Recipe(null, titleController.value.text, image, widget.category, quantityDouble,
                           recipeQuantityNameController.value.text, ingredients, instructionsController.value.text);
                       showDialog(
                         useRootNavigator: false,
@@ -406,28 +407,4 @@ class _NewRecipeState extends State<NewRecipe> {
       ),
     );
   }
-}
-
-class Ingredient {
-  final double? amount;
-  final String? unit;
-  final String name;
-
-  Ingredient(
-    this.amount,
-    this.unit,
-    this.name,
-  );
-}
-
-class Recipe {
-  final String name;
-  final File? image;
-  final String category;
-  final double? quantity;
-  final String? quantityName;
-  final List<Ingredient> ingredients;
-  final String? instructions;
-
-  Recipe(this.name, this.image, this.category, this.quantity, this.quantityName, this.ingredients, this.instructions);
 }

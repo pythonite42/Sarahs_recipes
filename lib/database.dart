@@ -1,5 +1,5 @@
 import 'package:mysql_client/mysql_client.dart';
-import 'package:sarahs_recipes/new_recipe.dart';
+import 'package:sarahs_recipes/main.dart';
 import 'package:sarahs_recipes/ssh.dart';
 
 class MySQL {
@@ -46,8 +46,8 @@ class MySQL {
         var secondCmd = await db.prepare(
           'INSERT INTO ingredient (recipe_id, entry_number, amount, unit, name) values (?, ?, ?, ?, ?)',
         );
-        for (final (i, ingredient) in recipe.ingredients.indexed) {
-          await secondCmd.execute([id, i, ingredient.amount, ingredient.unit, ingredient.name]);
+        for (final ingredient in recipe.ingredients) {
+          await secondCmd.execute([id, ingredient.entryNumber, ingredient.amount, ingredient.unit, ingredient.name]);
         }
         await secondCmd.deallocate();
         await SSH().uploadImage(recipe, id);
@@ -105,10 +105,46 @@ class MySQL {
       try {
         quantity = double.parse(content["quantity"]);
       } catch (_) {}
-      recipesList.add(Recipe(content["name"], images[i], content["category"], quantity, content["quantity_name"], [],
-          content["instructions"]));
+      int? id;
+      try {
+        id = int.parse(content["id"]);
+      } catch (_) {}
+      recipesList.add(Recipe(id, content["name"], images[i], content["category"], quantity, content["quantity_name"],
+          [], content["instructions"]));
       i += 1;
     }
     return recipesList;
+  }
+
+  Future getIngredientsById(int? recipeId) async {
+    try {
+      return await initializeDB((db) async {
+        if (db.runtimeType == String) {
+          return db;
+        }
+        var result = await db.execute('SELECT * FROM ingredient WHERE recipe_id = :recipeId', {"recipeId": recipeId});
+
+        List ingredientsList = [];
+
+        var i = 0;
+        for (final row in result.rows) {
+          //normal counting loop not possible because result.rows[i] throws error
+          Map content = row.assoc();
+          double? amount;
+          try {
+            amount = double.parse(content["amount"]);
+          } catch (_) {}
+          int? entryNumber;
+          try {
+            entryNumber = int.parse(content["entry_number"]);
+          } catch (_) {}
+          ingredientsList.add(Ingredient(entryNumber, amount, content["unit"], content["name"]));
+          i += 1;
+        }
+        return ingredientsList;
+      });
+    } catch (_) {
+      return _.toString();
+    }
   }
 }

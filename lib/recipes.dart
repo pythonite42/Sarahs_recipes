@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sarahs_recipes/database.dart';
-import 'package:sarahs_recipes/new_recipe.dart';
+import 'package:sarahs_recipes/main.dart';
 
 class Recipes extends StatefulWidget {
   const Recipes({super.key, required this.category});
@@ -61,7 +61,8 @@ class _RecipesState extends State<Recipes> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  print("go to recipe page");
+                                  Navigator.pushNamed(context, '/recipePage',
+                                      arguments: ScreenArguments(recipe: recipe));
                                 },
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
