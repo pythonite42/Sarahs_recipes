@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sarahs_recipes/categories.dart';
 import 'package:sarahs_recipes/new_recipe.dart';
+import 'package:sarahs_recipes/recipe_page.dart';
 import 'package:sarahs_recipes/recipes.dart';
 import 'colors.dart';
+import 'dart:io';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
@@ -33,14 +35,21 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(
             builder: (context) {
               return MyScaffold(
-                  pageTitle: args.newRecipeTitle ?? "Neues Rezeppt", body: NewRecipe(category: args.category));
+                  pageTitle: args.newRecipeTitle ?? "Neues Rezept", body: NewRecipe(category: args.category!));
             },
           );
         } else if (settings.name == '/recipes') {
           final args = settings.arguments as ScreenArguments;
           return MaterialPageRoute(
             builder: (context) {
-              return MyScaffold(pageTitle: args.category, body: Recipes(category: args.category));
+              return MyScaffold(pageTitle: args.category!, body: Recipes(category: args.category!));
+            },
+          );
+        } else if (settings.name == '/recipePage') {
+          final args = settings.arguments as ScreenArguments;
+          return MaterialPageRoute(
+            builder: (context) {
+              return MyScaffold(pageTitle: args.recipe!.name, body: RecipePage(recipe: args.recipe!));
             },
           );
         }
@@ -71,8 +80,37 @@ class MyScaffold extends StatelessWidget {
 }
 
 class ScreenArguments {
-  final String category;
+  final String? category;
   final String? newRecipeTitle;
+  final Recipe? recipe;
 
-  ScreenArguments(this.category, {this.newRecipeTitle});
+  ScreenArguments({this.category, this.newRecipeTitle, this.recipe});
+}
+
+class Ingredient {
+  final int? entryNumber;
+  final double? amount;
+  final String? unit;
+  final String name;
+
+  Ingredient(
+    this.entryNumber,
+    this.amount,
+    this.unit,
+    this.name,
+  );
+}
+
+class Recipe {
+  final int? id;
+  final String name;
+  final File? image;
+  final String category;
+  final double? quantity;
+  final String? quantityName;
+  final List<Ingredient> ingredients;
+  final String? instructions;
+
+  Recipe(this.id, this.name, this.image, this.category, this.quantity, this.quantityName, this.ingredients,
+      this.instructions);
 }

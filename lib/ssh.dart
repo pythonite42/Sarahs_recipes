@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:sarahs_recipes/main.dart';
 import 'package:ssh2/ssh2.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import 'new_recipe.dart';
 
 class SSH {
   Future<dynamic> initSSH(Function execute) async {
