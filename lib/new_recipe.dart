@@ -335,7 +335,7 @@ class _NewRecipeState extends State<NewRecipe> {
 
                         if (name != null && name != "") {
                           double? amountDouble;
-                          if (amount != null) {
+                          if (amount != null && amount.isNotEmpty) {
                             amountDouble = double.parse(amount.replaceAll(",", "."));
                             amountDouble = double.parse(amountDouble.toStringAsFixed(1));
                           }
