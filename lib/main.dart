@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Sarahs Recipes',
+      debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.light,
       theme: GlobalThemData.lightThemeData,
       darkTheme: GlobalThemData.darkThemeData,
