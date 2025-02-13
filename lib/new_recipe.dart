@@ -80,7 +80,7 @@ class _NewRecipeState extends State<NewRecipe> {
                   hintStyle: TextStyle(fontWeight: FontWeight.w300),
                 ),
                 textInputAction: TextInputAction.next,
-                textCapitalization: TextCapitalization.characters,
+                //textCapitalization: TextCapitalization.characters,
               ),
             ),
             SizedBox(
@@ -100,7 +100,7 @@ class _NewRecipeState extends State<NewRecipe> {
                   newFocusNode.requestFocus();
                 },
                 decoration: InputDecoration(hintText: 'Zutat', hintStyle: TextStyle(fontWeight: FontWeight.w300)),
-                textCapitalization: TextCapitalization.words,
+                textCapitalization: TextCapitalization.sentences,
               ),
             ),
             Visibility(
