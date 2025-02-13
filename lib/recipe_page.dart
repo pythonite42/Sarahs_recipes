@@ -406,7 +406,7 @@ class _RecipePageState extends State<RecipePage> {
                                           textCapitalization: TextCapitalization.sentences,
                                         )
                                       : Container(
-                                          color: Theme.of(context).colorScheme.surface,
+                                          //color: Theme.of(context).colorScheme.surface,
                                           constraints: BoxConstraints(minHeight: 200),
                                           width: double.infinity,
                                           child: Text(instructionsController.value.text),
