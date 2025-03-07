@@ -66,9 +66,9 @@ class MySQL {
         }
 
         var cmd = await db.prepare(
-          'INSERT INTO recipe (name, category, quantity, quantity_name, instructions) values (?, ?, ?, ?, ?)',
+          'INSERT INTO recipe (name, category, quantity, quantity_name, instructions, user_id) values (?, ?, ?, ?, ?, ?)',
         );
-        await cmd.execute([recipe.name, recipe.category, recipe.quantity, recipe.quantityName, recipe.instructions]);
+        await cmd.execute([recipe.name, recipe.category, recipe.quantity, recipe.quantityName, recipe.instructions, 1]);
         await cmd.deallocate();
         var result = await db.execute('SELECT last_insert_id()');
         int? id;
@@ -164,6 +164,7 @@ class MySQL {
 
         List ingredientsList = [];
 
+        // ignore: unused_local_variable
         var i = 0;
         for (final row in result.rows) {
           //normal counting loop not possible because result.rows[i] throws error
