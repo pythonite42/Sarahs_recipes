@@ -19,8 +19,8 @@ class Categories extends StatelessWidget {
 
   Future<String> getSelectedUsername() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var id = prefs.getInt('user_id');
-    User user = users.firstWhere((it) => it.id == id);
+    var id = prefs.getInt('userId');
+    User? user = users.firstWhere((it) => it.id == id);
     return user.name;
   }
 
@@ -29,85 +29,94 @@ class Categories extends StatelessWidget {
     return Stack(
       children: [
         SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              FutureBuilder<String>(
-                  future: getSelectedUsername(),
-                  builder: (context, AsyncSnapshot<String> snapshot) {
-                    if (snapshot.hasData) {
-                      return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                        Text("Ausgewählter Nutzer:"),
-                        DropdownButtonFormField(
-                          value: snapshot.data,
-                          icon: const Icon(Icons.expand_more),
-                          onChanged: (String? newValue) async {
-                            SharedPreferences prefs = await SharedPreferences.getInstance();
-                            User user = users.firstWhere((it) => it.name == newValue);
-                            prefs.setInt("userId", user.id);
-                          },
-                          items: users.map((it) => it.name).map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                        )
-                      ]);
-                    } else {
-                      return Container();
-                    }
-                  }),
-              for (var category in categories)
-                Container(
-                  padding: EdgeInsets.only(top: 30, left: 20, right: 20),
-                  width: double.infinity,
-                  height: 160,
-                  child: Material(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                    ),
-                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                    child: InkWell(
-                      splashColor: Theme.of(context).colorScheme.primary,
-                      onTap: () {
-                        Navigator.pushNamed(context, '/recipes',
-                            arguments: ScreenArguments(category: category["name"]));
-                      },
-                      child: Stack(
-                        children: [
-                          Ink.image(
-                            image: AssetImage('assets/${category["imageName"]}'),
-                            fit: BoxFit.cover,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    borderRadius: BorderRadius.all(Radius.circular(10))),
-                                padding: EdgeInsets.all(10),
-                                child: Text(
-                                  category["name"],
-                                  style: GoogleFonts.manrope(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w800,
-                                      color: Theme.of(context).colorScheme.onPrimary),
-                                ),
-                              )
-                            ]),
-                          )
-                        ],
+          child: Padding(
+            padding: EdgeInsets.only(top: 30, left: 20, right: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                FutureBuilder<String>(
+                    future: getSelectedUsername(),
+                    builder: (context, AsyncSnapshot<String> snapshot) {
+                      if (snapshot.hasData) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Ausgewählter Nutzer:"),
+                            SizedBox(width: 30),
+                            Flexible(
+                              child: DropdownButtonFormField(
+                                value: snapshot.data,
+                                icon: const Icon(Icons.expand_more),
+                                onChanged: (String? newValue) async {
+                                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                                  User user = users.firstWhere((it) => it.name == newValue);
+                                  prefs.setInt("userId", user.id);
+                                },
+                                items: users.map((it) => it.name).map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
+                        );
+                      } else {
+                        return Container();
+                      }
+                    }),
+                for (var category in categories)
+                  Container(
+                    padding: EdgeInsets.only(top: 30),
+                    width: double.infinity,
+                    height: 160,
+                    child: Material(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      child: InkWell(
+                        splashColor: Theme.of(context).colorScheme.primary,
+                        onTap: () {
+                          Navigator.pushNamed(context, '/recipes',
+                              arguments: ScreenArguments(category: category["name"]));
+                        },
+                        child: Stack(
+                          children: [
+                            Ink.image(
+                              image: AssetImage('assets/${category["imageName"]}'),
+                              fit: BoxFit.cover,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                                  padding: EdgeInsets.all(10),
+                                  child: Text(
+                                    category["name"],
+                                    style: GoogleFonts.manrope(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w800,
+                                        color: Theme.of(context).colorScheme.onPrimary),
+                                  ),
+                                )
+                              ]),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              SizedBox(
-                height: 90,
-              )
-            ],
+                SizedBox(
+                  height: 90,
+                )
+              ],
+            ),
           ),
         ),
         Container(

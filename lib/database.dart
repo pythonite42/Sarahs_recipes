@@ -27,8 +27,8 @@ class MySQL {
         if (db.runtimeType == String) {
           return db;
         }
-        var result = await db.execute('SELECT * FROM user');
-        List users = [];
+        var result = await db.execute('SELECT * FROM user ORDER BY id ASC');
+        List<User> users = [];
         for (final row in result.rows) {
           Map content = row.assoc();
           try {
