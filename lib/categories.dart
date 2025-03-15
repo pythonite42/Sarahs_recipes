@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sarahs_recipes/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Categories extends StatelessWidget {
-  Categories({super.key});
+  Categories({super.key, required this.users});
+
+  final List<User> users;
 
   final List categories = [
     {"name": "Salate", "imageName": "salad.jpeg", "newRecipeTitle": "Neuer Salat"},
@@ -14,6 +17,13 @@ class Categories extends StatelessWidget {
     {"name": "Sonstiges", "imageName": "sonstiges.jpg", "newRecipeTitle": "Neues Rezept"},
   ];
 
+  Future<String> getSelectedUsername() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var id = prefs.getInt('user_id');
+    User user = users.firstWhere((it) => it.id == id);
+    return user.name;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -22,6 +32,32 @@ class Categories extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              FutureBuilder<String>(
+                  future: getSelectedUsername(),
+                  builder: (context, AsyncSnapshot<String> snapshot) {
+                    if (snapshot.hasData) {
+                      return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                        Text("Ausgewählter Nutzer:"),
+                        DropdownButtonFormField(
+                          value: snapshot.data,
+                          icon: const Icon(Icons.expand_more),
+                          onChanged: (String? newValue) async {
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            User user = users.firstWhere((it) => it.name == newValue);
+                            prefs.setInt("userId", user.id);
+                          },
+                          items: users.map((it) => it.name).map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                        )
+                      ]);
+                    } else {
+                      return Container();
+                    }
+                  }),
               for (var category in categories)
                 Container(
                   padding: EdgeInsets.only(top: 30, left: 20, right: 20),
