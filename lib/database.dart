@@ -1,6 +1,7 @@
 import 'package:mysql_client/mysql_client.dart';
 import 'package:sarahs_recipes/main.dart';
 import 'package:sarahs_recipes/ssh.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MySQL {
   Future initializeDB(Function function) async {
@@ -15,6 +16,28 @@ class MySQL {
       var returnValue = await function(db);
       await db.close();
       return returnValue;
+    } catch (_) {
+      return _.toString();
+    }
+  }
+
+  Future getUsers() async {
+    try {
+      return await initializeDB((db) async {
+        if (db.runtimeType == String) {
+          return db;
+        }
+        var result = await db.execute('SELECT * FROM user ORDER BY id ASC');
+        List<User> users = [];
+        for (final row in result.rows) {
+          Map content = row.assoc();
+          try {
+            int id = int.parse(content["id"]);
+            users.add(User(id, content["name"]));
+          } catch (_) {}
+        }
+        return users;
+      });
     } catch (_) {
       return _.toString();
     }
@@ -64,11 +87,13 @@ class MySQL {
         if (db.runtimeType == String) {
           return db;
         }
-
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        var selectedUserId = prefs.getInt('userId') /* ?? 0 */;
         var cmd = await db.prepare(
-          'INSERT INTO recipe (name, category, quantity, quantity_name, instructions) values (?, ?, ?, ?, ?)',
+          'INSERT INTO recipe (name, category, quantity, quantity_name, instructions, user_id) values (?, ?, ?, ?, ?, ?)',
         );
-        await cmd.execute([recipe.name, recipe.category, recipe.quantity, recipe.quantityName, recipe.instructions]);
+        await cmd.execute(
+            [recipe.name, recipe.category, recipe.quantity, recipe.quantityName, recipe.instructions, selectedUserId]);
         await cmd.deallocate();
         var result = await db.execute('SELECT last_insert_id()');
         int? id;
@@ -102,6 +127,7 @@ class MySQL {
         if (db.runtimeType == String) {
           return db;
         }
+
         var result = await db.execute('SELECT * FROM recipe');
 
         return sqlResultToRecipe(result);
@@ -117,7 +143,10 @@ class MySQL {
         if (db.runtimeType == String) {
           return db;
         }
-        var result = await db.execute('SELECT * FROM recipe  WHERE category = :category', {"category": category});
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        var selectedUserId = prefs.getInt('userId') /* ?? 0 */;
+        var result = await db.execute('SELECT * FROM recipe  WHERE category = :category and user_id = :user_id',
+            {"category": category, "user_id": selectedUserId});
 
         return sqlResultToRecipe(result);
       });
@@ -164,6 +193,7 @@ class MySQL {
 
         List ingredientsList = [];
 
+        // ignore: unused_local_variable
         var i = 0;
         for (final row in result.rows) {
           //normal counting loop not possible because result.rows[i] throws error
