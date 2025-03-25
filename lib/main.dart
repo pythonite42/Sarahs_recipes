@@ -14,11 +14,13 @@ void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var selectedUserId = prefs.getInt('userId');
   if (selectedUserId == null) {
-    prefs.setInt("userId", 1);
+    prefs.setInt("userId", 0);
   }
   var users = await MySQL().getUsers();
   if (users is List<User>) {
-    runApp(MyApp(users: users));
+    var allUsers = users;
+    allUsers.add(User.defaultUser());
+    runApp(MyApp(users: allUsers));
   } else {
     runApp(const MyApp(users: []));
   }
@@ -142,4 +144,8 @@ class User {
   User getUserByName(List<User> users, String name) {
     return users.firstWhere((it) => it.name == name);
   }
+
+  User.defaultUser()
+      : id = 0,
+        name = 'Alle anzeigen';
 }

@@ -442,8 +442,7 @@ class _RecipePageState extends State<RecipePage> {
                                               }
                                             }
                                             double? quantityDouble;
-                                            if (recipeQuantityController.value.text != null &&
-                                                recipeQuantityController.value.text != "") {
+                                            if (recipeQuantityController.value.text != "") {
                                               quantityDouble = double.parse(
                                                   recipeQuantityController.value.text.replaceAll(",", "."));
                                               quantityDouble = double.parse(quantityDouble.toStringAsFixed(1));
