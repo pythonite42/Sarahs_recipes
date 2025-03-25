@@ -3,11 +3,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sarahs_recipes/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Categories extends StatelessWidget {
-  Categories({super.key, required this.users});
-
+class Categories extends StatefulWidget {
+  const Categories({super.key, required this.users});
   final List<User> users;
 
+  @override
+  State<Categories> createState() => _CategoriesState();
+}
+
+class _CategoriesState extends State<Categories> {
   final List categories = [
     {"name": "Salate", "imageName": "salad.jpeg", "newRecipeTitle": "Neuer Salat"},
     {"name": "Hauptgerichte", "imageName": "hauptgerichte.jpg", "newRecipeTitle": "Neues Hauptgericht"},
@@ -20,9 +24,14 @@ class Categories extends StatelessWidget {
   Future<String> getSelectedUsername() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var id = prefs.getInt('userId');
-    User? user = users.firstWhere((it) => it.id == id);
+    User? user = widget.users.firstWhere((it) => it.id == id);
+    setState(() {
+      currentUser = user;
+    });
     return user.name;
   }
+
+  User? currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -49,10 +58,13 @@ class Categories extends StatelessWidget {
                                 icon: const Icon(Icons.expand_more),
                                 onChanged: (String? newValue) async {
                                   SharedPreferences prefs = await SharedPreferences.getInstance();
-                                  User user = users.firstWhere((it) => it.name == newValue);
+                                  User user = widget.users.firstWhere((it) => it.name == newValue);
                                   prefs.setInt("userId", user.id);
+                                  setState(() {
+                                    currentUser = user;
+                                  });
                                 },
-                                items: users.map((it) => it.name).map<DropdownMenuItem<String>>((String value) {
+                                items: widget.users.map((it) => it.name).map<DropdownMenuItem<String>>((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
                                     child: Text(value),
@@ -124,53 +136,54 @@ class Categories extends StatelessWidget {
           child: Align(
             alignment: Alignment.bottomRight,
             child: SizedBox(
-              height: 80.0,
-              width: 80.0,
-              child: PopupMenuButton<int>(
-                color: Theme.of(context).colorScheme.surfaceDim,
-                itemBuilder: (context) => [
-                  for (var i = 0; i < categories.length; i++)
-                    PopupMenuItem(
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/newRecipe',
-                          arguments: ScreenArguments(
-                              category: categories[i]["name"], newRecipeTitle: categories[i]["newRecipeTitle"]),
-                        );
-                      },
-                      child: Column(children: [
-                        Container(
-                          constraints: BoxConstraints(minWidth: 100),
-                          child: Text(
-                            categories[i]["name"],
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w400,
+                height: 80.0,
+                width: 80.0,
+                child: currentUser?.id != 0
+                    ? PopupMenuButton<int>(
+                        color: Theme.of(context).colorScheme.surfaceDim,
+                        itemBuilder: (context) => [
+                          for (var i = 0; i < categories.length; i++)
+                            PopupMenuItem(
+                              onTap: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/newRecipe',
+                                  arguments: ScreenArguments(
+                                      category: categories[i]["name"], newRecipeTitle: categories[i]["newRecipeTitle"]),
+                                );
+                              },
+                              child: Column(children: [
+                                Container(
+                                  constraints: BoxConstraints(minWidth: 100),
+                                  child: Text(
+                                    categories[i]["name"],
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
+                              ]),
                             ),
+                        ],
+                        offset: Offset(-10, -300),
+                        icon: Container(
+                          height: double.infinity,
+                          width: double.infinity,
+                          decoration: ShapeDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              )),
+                          child: Icon(
+                            Icons.add,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            size: 35,
                           ),
                         ),
-                      ]),
-                    ),
-                ],
-                offset: Offset(-10, -300),
-                icon: Container(
-                  height: double.infinity,
-                  width: double.infinity,
-                  decoration: ShapeDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      )),
-                  child: Icon(
-                    Icons.add,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    size: 35,
-                  ),
-                ),
-              ),
-            ),
+                      )
+                    : Container()),
           ),
         )
       ],

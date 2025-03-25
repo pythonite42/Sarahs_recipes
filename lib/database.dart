@@ -88,7 +88,7 @@ class MySQL {
           return db;
         }
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        var selectedUserId = prefs.getInt('userId') /* ?? 0 */;
+        var selectedUserId = prefs.getInt('userId');
         var cmd = await db.prepare(
           'INSERT INTO recipe (name, category, quantity, quantity_name, instructions, user_id) values (?, ?, ?, ?, ?, ?)',
         );
@@ -121,22 +121,6 @@ class MySQL {
     }
   }
 
-  Future getRecipes() async {
-    try {
-      return await initializeDB((db) async {
-        if (db.runtimeType == String) {
-          return db;
-        }
-
-        var result = await db.execute('SELECT * FROM recipe');
-
-        return sqlResultToRecipe(result);
-      });
-    } catch (_) {
-      return _.toString();
-    }
-  }
-
   Future getRecipesByCategory(String category) async {
     try {
       return await initializeDB((db) async {
@@ -144,10 +128,14 @@ class MySQL {
           return db;
         }
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        var selectedUserId = prefs.getInt('userId') /* ?? 0 */;
-        var result = await db.execute('SELECT * FROM recipe  WHERE category = :category and user_id = :user_id',
-            {"category": category, "user_id": selectedUserId});
-
+        var selectedUserId = prefs.getInt('userId');
+        dynamic result;
+        if (selectedUserId != 0) {
+          result = await db.execute('SELECT * FROM recipe  WHERE category = :category and user_id = :user_id',
+              {"category": category, "user_id": selectedUserId});
+        } else {
+          result = await db.execute('SELECT * FROM recipe  WHERE category = :category', {"category": category});
+        }
         return sqlResultToRecipe(result);
       });
     } catch (_) {
