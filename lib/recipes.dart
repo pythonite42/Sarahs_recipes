@@ -89,10 +89,12 @@ class _RecipesState extends State<Recipes> {
                                     SizedBox(
                                       width: 20,
                                     ),
-                                    Text(
-                                      recipe.name,
-                                      style: TextStyle(fontSize: 20),
-                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        recipe.name,
+                                        style: TextStyle(fontSize: 20),
+                                      ),
+                                    )
                                   ],
                                 ),
                               ),
