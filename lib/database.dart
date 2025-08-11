@@ -4,6 +4,18 @@ import 'package:sarahs_recipes/ssh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+/* 
+
+Database structure:
+
+CREATE TABLE recipe (id INT AUTO_INCREMENT, name VARCHAR(100) NOT NULL, category VARCHAR(50) NOT NULL, quantity FLOAT, quantity_name VARCHAR(50), instructions VARCHAR(10000), user_id INT NOT NULL, PRIMARY KEY(id), UNIQUE (name), FOREIGN KEY (user_id) REFERENCES user(id));
+
+CREATE TABLE ingredient (id INT AUTO_INCREMENT, recipe_id INT NOT NULL, entry_number INT NOT NULL, amount FLOAT, unit VARCHAR(50), name VARCHAR(100) NOT NULL, PRIMARY KEY(id), FOREIGN KEY (recipe_id) REFERENCES recipe(id)); 
+
+CREATE TABLE user (id INT AUTO_INCREMENT, name VARCHAR(100) NOT NULL, PRIMARY KEY(id), UNIQUE (name));
+
+ */
+
 class MySQL {
   Future initializeDB(Function function) async {
     try {
@@ -13,7 +25,12 @@ class MySQL {
       String password = dotenv.env['DATABASE_PASSWORD'] ?? "";
       String databaseName = dotenv.env['DATABASE_NAME'] ?? "";
       var db = await MySQLConnection.createConnection(
-          host: host, port: port, userName: username, password: password, databaseName: databaseName);
+        host: host,
+        port: port,
+        userName: username,
+        password: password,
+        databaseName: databaseName,
+      );
       await db.connect();
       var returnValue = await function(db);
       await db.close();
@@ -60,9 +77,7 @@ class MySQL {
         await cmdUpdate.execute([recipe.name, recipe.quantity, recipe.quantityName, recipe.instructions, recipe.id]);
         await cmdUpdate.deallocate();
 
-        var cmdDelete = await db.prepare(
-          'DELETE FROM ingredient WHERE recipe_id=?',
-        );
+        var cmdDelete = await db.prepare('DELETE FROM ingredient WHERE recipe_id=?');
         await cmdDelete.execute([recipe.id]);
         await cmdDelete.deallocate();
 
@@ -70,8 +85,13 @@ class MySQL {
           'INSERT INTO ingredient (recipe_id, entry_number, amount, unit, name) values (?, ?, ?, ?, ?)',
         );
         for (final ingredient in recipe.ingredients) {
-          await cmdInsert
-              .execute([recipe.id, ingredient.entryNumber, ingredient.amount, ingredient.unit, ingredient.name]);
+          await cmdInsert.execute([
+            recipe.id,
+            ingredient.entryNumber,
+            ingredient.amount,
+            ingredient.unit,
+            ingredient.name,
+          ]);
         }
         await cmdInsert.deallocate();
 
@@ -94,8 +114,14 @@ class MySQL {
         var cmd = await db.prepare(
           'INSERT INTO recipe (name, category, quantity, quantity_name, instructions, user_id) values (?, ?, ?, ?, ?, ?)',
         );
-        await cmd.execute(
-            [recipe.name, recipe.category, recipe.quantity, recipe.quantityName, recipe.instructions, selectedUserId]);
+        await cmd.execute([
+          recipe.name,
+          recipe.category,
+          recipe.quantity,
+          recipe.quantityName,
+          recipe.instructions,
+          selectedUserId,
+        ]);
         await cmd.deallocate();
         var result = await db.execute('SELECT last_insert_id()');
         int? id;
@@ -133,8 +159,10 @@ class MySQL {
         var selectedUserId = prefs.getInt('userId');
         dynamic result;
         if (selectedUserId != 0) {
-          result = await db.execute('SELECT * FROM recipe  WHERE category = :category and user_id = :user_id',
-              {"category": category, "user_id": selectedUserId});
+          result = await db.execute('SELECT * FROM recipe  WHERE category = :category and user_id = :user_id', {
+            "category": category,
+            "user_id": selectedUserId,
+          });
         } else {
           result = await db.execute('SELECT * FROM recipe  WHERE category = :category', {"category": category});
         }
@@ -166,8 +194,18 @@ class MySQL {
       try {
         id = int.parse(content["id"]);
       } catch (_) {}
-      recipesList.add(Recipe(id, content["name"], images[i], content["category"], quantity, content["quantity_name"],
-          [], content["instructions"]));
+      recipesList.add(
+        Recipe(
+          id,
+          content["name"],
+          images[i],
+          content["category"],
+          quantity,
+          content["quantity_name"],
+          [],
+          content["instructions"],
+        ),
+      );
       i += 1;
     }
     return recipesList;
