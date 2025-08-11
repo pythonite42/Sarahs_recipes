@@ -8,6 +8,7 @@ import 'colors.dart';
 import 'dart:io';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,8 @@ void main() async {
   if (selectedUserId == null) {
     prefs.setInt("userId", 0);
   }
+  await dotenv.load(fileName: ".env");
+
   var users = await MySQL().getUsers();
   if (users is List<User>) {
     var allUsers = users;

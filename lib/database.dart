@@ -2,16 +2,18 @@ import 'package:mysql_client/mysql_client.dart';
 import 'package:sarahs_recipes/main.dart';
 import 'package:sarahs_recipes/ssh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MySQL {
   Future initializeDB(Function function) async {
     try {
+      String host = dotenv.env['SERVER_IP_ADDRESS'] ?? "";
+      int port = int.parse(dotenv.env['DATABASE_PORT'] ?? "0");
+      String username = dotenv.env['DATABASE_USERNAME'] ?? "";
+      String password = dotenv.env['DATABASE_PASSWORD'] ?? "";
+      String databaseName = dotenv.env['DATABASE_NAME'] ?? "";
       var db = await MySQLConnection.createConnection(
-          host: 'REMOVED',
-          port: REMOVED,
-          userName: 'REMOVED',
-          password: 'REMOVED',
-          databaseName: 'sarahs_recipes');
+          host: host, port: port, userName: username, password: password, databaseName: databaseName);
       await db.connect();
       var returnValue = await function(db);
       await db.close();

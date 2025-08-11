@@ -4,14 +4,19 @@ import 'package:sarahs_recipes/main.dart';
 import 'package:ssh2/ssh2.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SSH {
   Future<dynamic> initSSH(Function execute) async {
+    String host = dotenv.env['SERVER_IP_ADDRESS'] ?? "";
+    int port = int.parse(dotenv.env['SERVER_SSH_PORT'] ?? "0");
+    String username = dotenv.env['SERVER_USERNAME'] ?? "";
+    String password = dotenv.env['SERVER_PASSWORD'] ?? "";
     var client = SSHClient(
-      host: "REMOVED",
-      port: REMOVED,
-      username: REMOVED,
-      passwordOrKey: "REMOVED",
+      host: host,
+      port: port,
+      username: username,
+      passwordOrKey: password,
     );
     try {
       var result = await client.connect() ?? 'Null result';
