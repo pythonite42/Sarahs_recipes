@@ -44,7 +44,9 @@ class _NewRecipeState extends State<NewRecipe> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    item.addAll({0: newMethod(context, 0, FocusNode())});
+    if (item.isEmpty) {
+      item.addAll({0: newMethod(context, 0, FocusNode())});
+    }
   }
 
   newMethod(BuildContext context, int index, FocusNode focusNode) {
@@ -96,7 +98,14 @@ class _NewRecipeState extends State<NewRecipe> {
                 },
                 onFieldSubmitted: (value) {
                   var newFocusNode = FocusNode();
-                  item.addAll({item.keys.last + 1: newMethod(context, item.keys.last + 1, newFocusNode)});
+                  int nextKey() {
+                    if (item.isEmpty) return 0;
+                    final keys = item.keys;
+                    return (keys.reduce((a, b) => a > b ? a : b)) + 1;
+                  }
+
+                  final key = nextKey();
+                  item.addAll({key: newMethod(context, key, newFocusNode)});
                   setState(() {});
                   newFocusNode.requestFocus();
                 },
@@ -136,10 +145,10 @@ class _NewRecipeState extends State<NewRecipe> {
 
   @override
   void dispose() {
-    for (int i = 0; i <= nameTECs.keys.last; i++) {
-      amountTECs[i]?.dispose();
-      unitTECs[i]?.dispose();
-      nameTECs[i]?.dispose();
+    for (final k in nameTECs.keys.toList()) {
+      amountTECs[k]?.dispose();
+      unitTECs[k]?.dispose();
+      nameTECs[k]?.dispose();
     }
     super.dispose();
   }
@@ -329,20 +338,21 @@ class _NewRecipeState extends State<NewRecipe> {
                     if (_formKey.currentState!.validate()) {
                       ingredients.clear();
 
-                      for (int i = 0; i <= nameTECs.keys.last; i++) {
-                        var amount = amountTECs[i]?.value.text;
-                        var unit = unitTECs[i]?.value.text;
-                        var name = nameTECs[i]?.value.text;
+                      for (final i in (nameTECs.keys.toList())) {
+                        final name = nameTECs[i]?.text.trim() ?? '';
+                        if (name.isEmpty) continue;
 
-                        if (name != null && name != "") {
-                          double? amountDouble;
-                          if (amount != null && amount.isNotEmpty) {
-                            amountDouble = double.parse(amount.replaceAll(",", "."));
-                            amountDouble = double.parse(amountDouble.toStringAsFixed(1));
-                          }
-                          ingredients.add(Ingredient(i, amountDouble, unit, name));
+                        final amountText = amountTECs[i]?.text.trim() ?? '';
+                        double? amountDouble =
+                            amountText.isEmpty ? null : double.parse(amountText.replaceAll(',', '.'));
+                        if (amountDouble != null) {
+                          amountDouble = double.parse(amountDouble.toStringAsFixed(1));
                         }
+
+                        final unit = unitTECs[i]?.text;
+                        ingredients.add(Ingredient(i, amountDouble, unit, name));
                       }
+
                       double? quantityDouble;
                       if (recipeQuantityController.value.text != null && recipeQuantityController.value.text != "") {
                         quantityDouble = double.parse(recipeQuantityController.value.text.replaceAll(",", "."));
