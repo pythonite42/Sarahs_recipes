@@ -145,10 +145,15 @@ class _RecipePageState extends State<RecipePage> {
                       },
                       onFieldSubmitted: (value) {
                         var newFocusNode = FocusNode();
-                        ingredientWidgets.addAll({
-                          ingredientWidgets.keys.last + 1:
-                              newMethod(context, ingredientWidgets.keys.last + 1, newFocusNode, null)
-                        });
+                        int nextKey() {
+                          if (ingredientWidgets.isEmpty) return 0;
+                          final keys = ingredientWidgets.keys;
+                          return (keys.reduce((a, b) => a > b ? a : b)) + 1;
+                        }
+
+                        final key = nextKey();
+                        ingredientWidgets.addAll({key: newMethod(context, key, newFocusNode, null)});
+
                         setState(() {});
                         newFocusNode.requestFocus();
                       },
@@ -428,7 +433,7 @@ class _RecipePageState extends State<RecipePage> {
                                           if (_formKey.currentState!.validate()) {
                                             ingredients.clear();
 
-                                            for (int i = 0; i <= nameTECs.keys.last; i++) {
+                                            for (final i in (nameTECs.keys.toList())) {
                                               final name = nameTECs[i]!.text.trim();
                                               if (name.isEmpty) continue;
 
